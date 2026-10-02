@@ -90,6 +90,16 @@ button:hover:not(:disabled){border-color:#6b7377;transform:translateY(-1px)}
   user-select:none;
 }
 .bag-cell.empty:hover{background:#1d2224}
+.bag-cell.place-valid{
+  border-color:#6e9877;
+  background:#18231c;
+  box-shadow:inset 0 0 0 1px rgba(110,152,119,.18);
+}
+.bag-cell.place-invalid{
+  opacity:.45;
+  background:#171516;
+  border-color:#5a4343;
+}
 .bag-cell.occupied{
   border-style:solid;
   background:linear-gradient(145deg,#52493a,#302c27);
