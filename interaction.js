@@ -43,8 +43,9 @@
   }
 
   function refreshDraggables(root = document) {
+    const coarsePointer = window.matchMedia?.("(pointer: coarse)")?.matches;
     root.querySelectorAll(selectors.draggable).forEach(node => {
-      node.draggable = true;
+      node.draggable = !coarsePointer;
       node.title = node.title || "ドラッグして移動できます";
     });
   }
@@ -245,7 +246,7 @@
 
   document.addEventListener("click", event => {
     if (performance.now() >= suppressClickUntil) return;
-    if (!event.target.closest(selectors.draggable)) return;
+    if (!event.target.closest(".bag-grid, .staging-area")) return;
     event.preventDefault();
     event.stopImmediatePropagation();
   }, true);
@@ -261,10 +262,9 @@
       record.addedNodes.forEach(node => {
         if (node.nodeType !== Node.ELEMENT_NODE) return;
         if (node.matches?.(selectors.draggable)) {
-          node.draggable = true;
           node.title = "ドラッグして移動できます";
         }
-        refreshDraggables(node);
+        refreshDraggables(node.parentElement || node);
       });
     }
   });
