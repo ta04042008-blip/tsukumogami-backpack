@@ -1,0 +1,200 @@
+:root{
+  --bg:#111314;
+  --panel:#1a1d1f;
+  --panel-2:#202426;
+  --line:#363b3e;
+  --text:#f3efe6;
+  --muted:#aaa59a;
+  --paper:#d8c9a7;
+  --accent:#c6533f;
+  --accent-2:#e09a56;
+  --good:#6f9b77;
+  --danger:#b94e4e;
+  --cell:clamp(46px,13.5vw,72px);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI","Yu Gothic",Meiryo,sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  color:var(--text);
+  background:
+    radial-gradient(circle at top right,rgba(198,83,63,.12),transparent 32rem),
+    linear-gradient(180deg,#111314,#0d0f10);
+  min-height:100vh;
+}
+button{font:inherit}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:not(:disabled){cursor:pointer}
+.app-shell{width:min(1100px,100%);margin:0 auto;padding:18px 14px 48px}
+.topbar,.section-heading,.hud,.battle-launch,.combatant-row,.battle-top{
+  display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.topbar{margin-bottom:14px}
+.topbar h1,.section-heading h2{margin:0}
+.topbar h1{font-size:clamp(1.35rem,4vw,2rem);letter-spacing:.03em}
+.topbar h1 span{font-size:.72rem;color:var(--muted);font-weight:600}
+.eyebrow{margin:0 0 3px;color:var(--accent-2);font-size:.7rem;font-weight:800;letter-spacing:.14em}
+.card{
+  background:linear-gradient(180deg,rgba(255,255,255,.025),transparent),var(--panel);
+  border:1px solid var(--line);
+  border-radius:16px;
+  box-shadow:0 14px 40px rgba(0,0,0,.18);
+}
+.hud{padding:12px 14px;margin-bottom:14px}
+.hud-item{display:flex;align-items:center;gap:9px;min-width:0}
+.hud-item>span{color:var(--muted);font-size:.82rem}
+.hp-item{flex:1;justify-content:center}
+.meter{
+  width:min(220px,30vw);height:10px;background:#0c0e0f;border:1px solid var(--line);border-radius:99px;overflow:hidden
+}
+.meter-fill{height:100%;width:100%;background:linear-gradient(90deg,#6d9a78,#a2c59d);transition:width .18s ease}
+.enemy-fill{background:linear-gradient(90deg,#b54a46,#dd785e)}
+.game-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(250px,.85fr);gap:14px}
+.board-card,.shop-card,.recipe-card,.staging-card,.reaction-card{padding:14px}
+.side-column{display:grid;gap:14px;align-content:start}
+.section-heading{margin-bottom:10px}
+.section-heading.compact{align-items:flex-end}
+.section-heading h2{font-size:1.15rem}
+.helper-text{margin:0 0 10px;color:var(--muted);font-size:.82rem}
+.selection-actions{display:flex;gap:8px}
+button{
+  border:1px solid #494f52;
+  border-radius:10px;
+  padding:8px 11px;
+  color:var(--text);
+  background:#2a2f31;
+}
+button:hover:not(:disabled){border-color:#6b7377;transform:translateY(-1px)}
+.ghost-button{background:transparent}
+.primary-button{
+  background:linear-gradient(180deg,#cf604a,#a84434);
+  border-color:#de765f;
+  font-weight:800;
+  min-width:120px;
+}
+.bag-grid{
+  display:grid;
+  grid-template-columns:repeat(6,var(--cell));
+  grid-template-rows:repeat(5,var(--cell));
+  gap:4px;
+  justify-content:center;
+  touch-action:manipulation;
+}
+.bag-cell{
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  border:1px dashed #4a5053;
+  border-radius:9px;
+  background:#141718;
+  min-width:0;
+  user-select:none;
+}
+.bag-cell.empty:hover{background:#1d2224}
+.bag-cell.occupied{
+  border-style:solid;
+  background:linear-gradient(145deg,#52493a,#302c27);
+  color:#fff7e7;
+}
+.bag-cell.weapon{background:linear-gradient(145deg,#65453e,#352a28)}
+.bag-cell.support{background:linear-gradient(145deg,#41564d,#29332f)}
+.bag-cell.defense{background:linear-gradient(145deg,#435361,#293139)}
+.bag-cell.heal{background:linear-gradient(145deg,#4f6046,#2c3428)}
+.bag-cell.fire{background:linear-gradient(145deg,#6e4a32,#382b24)}
+.bag-cell.selected{outline:3px solid var(--paper);outline-offset:-3px}
+.bag-cell.reacting{box-shadow:inset 0 0 0 3px var(--accent-2)}
+.cell-label{
+  display:block;text-align:center;font-size:.72rem;font-weight:800;line-height:1.1;padding:2px;pointer-events:none
+}
+.cell-sub{display:block;font-size:.58rem;color:#e4d7c0;margin-top:3px}
+.direction-arrow{position:absolute;right:3px;top:2px;font-size:.72rem;color:#ffd28f}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:.72rem}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.dot-selected{background:var(--paper)}
+.dot-reaction{background:var(--accent-2)}
+.dot-direction{background:#94b6ce}
+.staging-area{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.staging-slot{
+  min-height:66px;border:1px dashed #4a5053;border-radius:10px;background:#141718;padding:7px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center
+}
+.staging-slot.filled{border-style:solid;background:#262421}
+.staging-slot.selected{outline:2px solid var(--paper)}
+.staging-slot strong{font-size:.78rem}
+.staging-slot span{font-size:.66rem;color:var(--muted)}
+.reaction-list{display:grid;gap:8px}
+.reaction-item{
+  border:1px solid #514634;background:#2b251d;border-radius:10px;padding:9px 10px;font-size:.78rem
+}
+.reaction-item strong{color:#ffd092}
+.empty-note{color:var(--muted);font-size:.8rem;margin:3px 0}
+.pill{
+  border:1px solid var(--line);border-radius:99px;padding:4px 8px;color:var(--muted);font-size:.72rem
+}
+.shop-card{margin-top:14px}
+.shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.shop-item{border:1px solid var(--line);background:var(--panel-2);border-radius:12px;padding:10px}
+.shop-item h3{font-size:.92rem;margin:0 0 4px}
+.shop-item p{font-size:.7rem;color:var(--muted);min-height:3em;margin:0 0 8px}
+.shop-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.price{color:#f2c988;font-weight:800}
+.battle-launch{
+  margin:14px 0;padding:14px 16px;border:1px solid #62483c;border-radius:16px;
+  background:linear-gradient(90deg,#211c1a,#181a1b)
+}
+.battle-launch>div{display:flex;flex-direction:column;gap:2px}
+.battle-launch strong{font-size:1.1rem}
+.battle-launch span{color:var(--muted);font-size:.78rem}
+.recipe-book{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.recipe-entry{
+  border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#171a1b;font-size:.75rem
+}
+.recipe-entry.locked{color:#777}
+.recipe-entry strong{color:#f0c687}
+footer{text-align:center;color:#777;font-size:.72rem;padding-top:16px}
+.modal{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(4,5,5,.82);padding:18px;z-index:30
+}
+.modal.open{display:flex}
+.battle-panel{
+  width:min(520px,100%);background:#171a1b;border:1px solid #4a4f52;border-radius:18px;padding:18px;
+  box-shadow:0 28px 80px rgba(0,0,0,.45)
+}
+.battle-top h2{margin:0}
+.combatant{padding:12px 0}
+.meter.large{width:100%;height:14px;margin-top:7px}
+.battle-center{text-align:center;color:var(--accent-2);font-weight:900;padding:4px}
+.shield-line{margin-top:7px;color:#9cb8cc;font-size:.82rem}
+.battle-log{
+  height:160px;overflow:auto;border:1px solid var(--line);background:#0f1112;border-radius:10px;
+  padding:9px;font-size:.74rem;line-height:1.55;color:#d0cdc5
+}
+.battle-log p{margin:0 0 2px}
+.battle-result{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.battle-result h3{margin:0 0 5px}
+.battle-result p{color:var(--muted);font-size:.82rem}
+.hidden{display:none}
+.toast{
+  position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
+  background:#f3e8cf;color:#231f19;padding:10px 14px;border-radius:10px;font-weight:700;font-size:.82rem;
+  opacity:0;pointer-events:none;transition:.2s;z-index:50;max-width:min(90vw,520px);text-align:center
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:800px){
+  .game-layout{grid-template-columns:1fr}
+  .side-column{grid-template-columns:1fr 1fr}
+  .shop-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .app-shell{padding:10px 9px 38px}
+  .topbar{align-items:flex-start}
+  .topbar h1 span{display:block;margin-top:3px}
+  .hud{gap:8px;flex-wrap:wrap}
+  .hp-item{order:3;flex-basis:100%;justify-content:flex-start}
+  .hp-item .meter{flex:1;width:auto}
+  .side-column{grid-template-columns:1fr}
+  .bag-grid{gap:3px}
+  .shop-grid{grid-template-columns:repeat(2,1fr)}
+  .recipe-book{grid-template-columns:1fr}
+  .battle-launch{align-items:flex-end}
+}
