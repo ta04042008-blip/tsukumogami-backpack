@@ -198,3 +198,16 @@ footer{text-align:center;color:#777;font-size:.72rem;padding-top:16px}
   .recipe-book{grid-template-columns:1fr}
   .battle-launch{align-items:flex-end}
 }
+
+.tsukumogami-section{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+}
+.tsukumogami-section .recipe-entry.known-tsukumogami{
+  background:linear-gradient(145deg,#33283b,#211d25);
+  border-color:#66516f;
+}
+.tsukumogami-section .recipe-entry.known-tsukumogami strong{
+  color:#e4bfef;
+}
