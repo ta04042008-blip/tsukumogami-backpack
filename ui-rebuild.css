@@ -1693,3 +1693,29 @@ body.battle-mode .codex-drawer{
     height:20px;
   }
 }
+
+
+/* Mobile readability pass for the first official 32x32 item icons.
+   Keep the source PNGs unchanged; only enlarge their rendered size within existing hit targets. */
+@media(max-width:520px){
+  .item-glyph.has-item-icon{
+    width:32px;
+    height:32px;
+  }
+
+  .shop-sprite.has-item-icon{
+    width:34px;
+    height:34px;
+    padding:1px;
+  }
+
+  .staging-glyph.has-item-icon{
+    width:22px;
+    height:22px;
+  }
+
+  .battle-item-visual.has-item-icon{
+    width:26px;
+    height:26px;
+  }
+}
