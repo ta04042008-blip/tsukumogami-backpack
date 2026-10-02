@@ -274,7 +274,7 @@
     { a: "lit_lantern", b: "mirror", result: "reflecting_lantern" }
   ];
   
-  const AWAKEN_BATTLES = 2;
+  const AWAKEN_BATTLES = 3;
   const AWAKENINGS = {
     curse_return_mirror: "kaeshi_mirror",
     flame_blade: "fire_eater_blade",
@@ -285,11 +285,23 @@
   };
   
   const ENEMIES = [
-    { name: "小鬼", hp: 65, attack: 6, interval: 2400, reward: 6 },
-    { name: "一つ目小僧", hp: 90, attack: 7, interval: 2100, reward: 7 },
-    { name: "骸骨武者", hp: 125, attack: 10, interval: 2500, reward: 8, reduction: 0.1 },
-    { name: "火車", hp: 145, attack: 6, interval: 1500, reward: 9 },
-    { name: "赤鬼", hp: 280, attack: 12, interval: 2400, reward: 0, heavy: { interval: 8000, damage: 20 } }
+    { name: "小鬼", hp: 65, attack: 6, interval: 2400, reward: 4, act: 1 },
+    { name: "一つ目小僧", hp: 82, attack: 7, interval: 2200, reward: 4, act: 1 },
+    { name: "河童", hp: 100, attack: 8, interval: 2300, reward: 5, act: 1 },
+    { name: "骸骨武者", hp: 125, attack: 10, interval: 2500, reward: 5, reduction: 0.1, act: 1 },
+    { name: "大鬼", hp: 175, attack: 11, interval: 2300, reward: 7, heavy: { interval: 9000, damage: 14 }, boss: true, act: 1 },
+
+    { name: "鎌鼬", hp: 150, attack: 8, interval: 1500, reward: 5, act: 2 },
+    { name: "化け狸", hp: 175, attack: 10, interval: 2100, reward: 5, act: 2 },
+    { name: "雪女", hp: 200, attack: 11, interval: 2000, reward: 6, act: 2 },
+    { name: "火車", hp: 225, attack: 8, interval: 1350, reward: 6, act: 2 },
+    { name: "鵺", hp: 320, attack: 14, interval: 2200, reward: 8, heavy: { interval: 7500, damage: 18 }, boss: true, act: 2 },
+
+    { name: "土蜘蛛", hp: 270, attack: 13, interval: 1900, reward: 6, reduction: 0.08, act: 3 },
+    { name: "天狗", hp: 310, attack: 15, interval: 1800, reward: 6, act: 3 },
+    { name: "がしゃどくろ", hp: 360, attack: 18, interval: 2400, reward: 7, reduction: 0.12, act: 3 },
+    { name: "青鬼", hp: 420, attack: 18, interval: 2000, reward: 7, heavy: { interval: 8000, damage: 22 }, act: 3 },
+    { name: "赤鬼", hp: 560, attack: 20, interval: 1900, reward: 0, heavy: { interval: 7000, damage: 28 }, boss: true, finalBoss: true, act: 3 }
   ];
   
   const DIRS = [
