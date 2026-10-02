@@ -53,6 +53,10 @@ jobs:
           grep -q 'interaction.js' index.html
           grep -q 'interaction.css' index.html
           grep -q 'stageMap' index.html
+          grep -q 'game-screen-v3' index.html
+          grep -q 'arena-battle-hud' index.html
+          grep -q 'sceneActMark' index.html
+          grep -q 'resetButton' index.html
           grep -q 'itemDetailStats' index.html
           grep -q 'reactionLinks' index.html
           grep -q 'itemDetailClose' index.html
