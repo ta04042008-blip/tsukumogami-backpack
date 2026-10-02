@@ -49,7 +49,7 @@
 - 一見ハズレの変化品を後から強い道具へ育てる体験
 - 古道具が付喪神になっていくテーマとの一体感
 
-詳しい仕様は [GAME_DESIGN.md](./GAME_DESIGN.md)、今後の実装予定は [ROADMAP.md](./ROADMAP.md) を参照してください。
+詳しい仕様は [GAME_DESIGN.md](./GAME_DESIGN.md)、今後の実装予定は [ROADMAP.md](./ROADMAP.md)、確認項目は [PLAYTEST.md](./PLAYTEST.md) を参照してください。
 
 ## GitHub Pages
 
