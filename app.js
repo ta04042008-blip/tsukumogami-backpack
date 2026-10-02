@@ -122,6 +122,34 @@
     return def.name.replace(/^付喪神・/, "").replace(/^お/, "").slice(0, 1) || "?";
   }
 
+  function itemIconPath(itemOrType) {
+    return defOf(itemOrType)?.icon || "";
+  }
+
+  function itemVisualMarkup(itemOrType) {
+    const icon = itemIconPath(itemOrType);
+    if (!icon) return itemGlyph(itemOrType);
+    return `<img class="item-icon-image" src="${icon}" alt="" width="32" height="32" draggable="false" />`;
+  }
+
+  function applyItemVisual(container, itemOrType) {
+    if (!container) return;
+    const icon = itemIconPath(itemOrType);
+    container.classList.toggle("has-item-icon", Boolean(icon));
+    if (icon) {
+      const img = document.createElement("img");
+      img.className = "item-icon-image";
+      img.src = icon;
+      img.alt = "";
+      img.width = 32;
+      img.height = 32;
+      img.draggable = false;
+      container.replaceChildren(img);
+    } else {
+      container.textContent = itemGlyph(itemOrType);
+    }
+  }
+
   function shortItemName(itemOrType) {
     const def = defOf(itemOrType);
     if (!def) return "";
@@ -452,7 +480,7 @@
 
             const glyph = document.createElement("span");
             glyph.className = "item-glyph";
-            glyph.textContent = itemGlyph(item);
+            applyItemVisual(glyph, item);
             label.appendChild(glyph);
 
             const name = document.createElement("span");
@@ -607,7 +635,7 @@
         slot.classList.add("filled");
         slot.dataset.itemId = item.id;
         if (item.id === state.selectedId) slot.classList.add("selected");
-        slot.innerHTML = `<span class="staging-glyph">${itemGlyph(item)}</span><strong>${shortItemName(item)}</strong><span>${dimensions(item).w}×${dimensions(item).h}</span>`;
+        slot.innerHTML = `<span class="staging-glyph${itemIconPath(item) ? " has-item-icon" : ""}">${itemVisualMarkup(item)}</span><strong>${shortItemName(item)}</strong><span>${dimensions(item).w}×${dimensions(item).h}</span>`;
         slot.addEventListener("click", () => {
           if (state.inBattle || state.runOver) return;
           state.previewType = null;
@@ -796,7 +824,10 @@
       } else {
         el.selectionText.textContent = "道具を選ぶと、ここに性能・変化・使用年月が表示されます。";
         if (el.itemDetailName) el.itemDetailName.textContent = "道具を選択";
-        if (el.itemDetailGlyph) el.itemDetailGlyph.textContent = "?";
+        if (el.itemDetailGlyph) {
+          el.itemDetailGlyph.classList.remove("has-item-icon");
+          el.itemDetailGlyph.textContent = "?";
+        }
         if (el.itemDetailStats) {
           el.itemDetailStats.innerHTML = '<span class="detail-placeholder">カバンや入手品をタップしてください。</span>';
         }
@@ -830,7 +861,7 @@
     if (!def || !el.itemDetailStats) return;
 
     el.itemDetailName.textContent = def.name;
-    el.itemDetailGlyph.textContent = itemGlyph(typeId);
+    applyItemVisual(el.itemDetailGlyph, typeId);
     el.selectionText.textContent = def.description;
 
     const fake = item || { typeId, rot: 0, location: "preview", stored: [], battlesUsed: 0 };
@@ -921,7 +952,7 @@
           <h3>${def.name}</h3>
           <span class="rarity-badge ${rarity.className}">${rarity.label}</span>
         </div>
-        <div class="shop-sprite" aria-hidden="true">${itemGlyph(typeId)}</div>
+        <div class="shop-sprite${itemIconPath(typeId) ? " has-item-icon" : ""}" aria-hidden="true">${itemVisualMarkup(typeId)}</div>
         <p>${def.description}</p>
         <div class="shop-footer">
           <span class="price">${def.price}文</span>
@@ -1301,7 +1332,12 @@
 
           if (item.x === x && item.y === y) {
             const label = document.createElement("span");
-            label.textContent = def.name.replace(/^付喪神・/, "").slice(0, 3);
+            label.className = "battle-item-visual";
+            if (itemIconPath(item)) {
+              applyItemVisual(label, item);
+            } else {
+              label.textContent = def.name.replace(/^付喪神・/, "").slice(0, 3);
+            }
             cell.appendChild(label);
           }
         }
