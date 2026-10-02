@@ -58,6 +58,12 @@
       description: "隣接する火系道具の効果量+25%。",
       fireBoost: 0.25
     },
+    furoshiki: {
+      name: "風呂敷", w: 2, h: 2, price: 6, category: "support",
+      description: "隣接した1×1道具を最大5個収納。中身1個につき周囲の効果量+4%。",
+      containerCapacity: 5,
+      containerPowerPerItem: 0.04
+    },
 
     cracked_mirror: {
       name: "割れた鏡", w: 1, h: 1, price: 4, category: "defense",
@@ -192,7 +198,7 @@
     }
   };
 
-  const SHOP_POOL = ["sword", "hammer", "mirror", "lantern", "umbrella", "fan", "charm", "medicine", "oil", "flint"];
+  const SHOP_POOL = ["sword", "hammer", "mirror", "lantern", "umbrella", "fan", "charm", "medicine", "oil", "flint", "furoshiki"];
 
   const RECIPES = [
     { a: "hammer", b: "mirror", result: "cracked_mirror" },
@@ -251,7 +257,7 @@
   function init() {
     [
       "turnLabel", "playerHpBar", "playerHpLabel", "coinLabel", "bagGrid", "selectionText",
-      "rotateButton", "sellButton", "stagingArea", "stagingCount", "reactionList", "shopGrid",
+      "rotateButton", "storageButton", "sellButton", "stagingArea", "stagingCount", "reactionList", "shopGrid",
       "rerollButton", "enemyPreview", "battleButton", "recipeBook", "recipeProgress", "resetButton",
       "battleModal", "battleEnemyName", "battleTimer", "enemyHpLabel", "enemyHpBar",
       "battlePlayerHpLabel", "battlePlayerHpBar", "shieldLabel", "battleLog", "battleResult",
@@ -259,6 +265,7 @@
     ].forEach(id => el[id] = document.getElementById(id));
 
     el.rotateButton.addEventListener("click", rotateSelected);
+    el.storageButton.addEventListener("click", handleStorageAction);
     el.sellButton.addEventListener("click", sellSelected);
     el.rerollButton.addEventListener("click", rerollShop);
     el.battleButton.addEventListener("click", startBattle);
@@ -306,7 +313,8 @@
       location,
       x: null,
       y: null,
-      rot: 0
+      rot: 0,
+      stored: []
     };
   }
 
@@ -466,7 +474,10 @@
             const sub = document.createElement("span");
             sub.className = "cell-sub";
             const { w, h } = dimensions(item);
-            sub.textContent = `${w}×${h}`;
+            const capacity = def.containerCapacity || 0;
+            sub.textContent = capacity
+              ? `${w}×${h}｜包${item.stored?.length || 0}/${capacity}`
+              : `${w}×${h}`;
             label.appendChild(sub);
             cell.appendChild(label);
 
@@ -577,6 +588,64 @@
     });
   }
 
+  function canStoreIn(container, item) {
+    if (!container || !item || container.id === item.id) return false;
+    const cdef = defOf(container);
+    if (!cdef.containerCapacity) return false;
+    if (container.location !== "bag" || item.location !== "bag") return false;
+    if ((container.stored?.length || 0) >= cdef.containerCapacity) return false;
+    const dims = dimensions(item);
+    return dims.w === 1 && dims.h === 1 && !defOf(item).containerCapacity;
+  }
+
+  function adjacentContainerFor(item) {
+    if (!item || item.location !== "bag") return null;
+    return bagItems().find(container => areAdjacent(item, container) && canStoreIn(container, item)) || null;
+  }
+
+  function handleStorageAction() {
+    const item = itemById(state.selectedId);
+    if (!item || state.inBattle || state.runOver) return;
+    const def = defOf(item);
+
+    if (def.containerCapacity) {
+      if (!item.stored?.length) {
+        showToast("風呂敷の中は空です。");
+        return;
+      }
+      if (stagingItems().length >= STAGING_LIMIT) {
+        showToast("仮置き場に空きがありません。");
+        return;
+      }
+
+      const restored = item.stored.pop();
+      restored.location = "staging";
+      restored.x = null;
+      restored.y = null;
+      state.items.push(restored);
+      state.selectedId = restored.id;
+      showToast(`${defOf(restored).name}を風呂敷から取り出しました。`);
+      renderAll();
+      return;
+    }
+
+    const container = adjacentContainerFor(item);
+    if (!container) {
+      showToast("収納できる風呂敷を隣に置いてください。");
+      return;
+    }
+
+    state.items = state.items.filter(x => x.id !== item.id);
+    item.location = "stored";
+    item.x = null;
+    item.y = null;
+    container.stored = container.stored || [];
+    container.stored.push(item);
+    state.selectedId = container.id;
+    showToast(`${def.name}を風呂敷に収納しました。収納中は変化しません。`);
+    renderAll();
+  }
+
   function renderSelection() {
     const item = itemById(state.selectedId);
     const disabled = !item || state.inBattle || state.runOver;
@@ -584,13 +653,24 @@
     el.sellButton.disabled = disabled;
 
     if (!item) {
+      el.storageButton.disabled = true;
+      el.storageButton.textContent = "収納";
       el.selectionText.textContent = "道具を選択し、空いているマスをタップして配置します。";
       return;
     }
 
     const def = defOf(item);
+    if (def.containerCapacity) {
+      el.storageButton.textContent = "取出";
+      el.storageButton.disabled = disabled || !(item.stored?.length);
+    } else {
+      el.storageButton.textContent = "収納";
+      el.storageButton.disabled = disabled || !adjacentContainerFor(item);
+    }
+
     const place = item.location === "bag" ? "カバン" : "仮置き場";
-    el.selectionText.textContent = `${def.name}｜${place}｜${def.description}`;
+    const storedInfo = def.containerCapacity ? `｜収納 ${item.stored?.length || 0}/${def.containerCapacity}` : "";
+    el.selectionText.textContent = `${def.name}｜${place}${storedInfo}｜${def.description}`;
   }
 
   function rotateSelected() {
@@ -613,6 +693,10 @@
     const item = itemById(state.selectedId);
     if (!item || state.inBattle || state.runOver) return;
     const def = defOf(item);
+    if (def.containerCapacity && item.stored?.length) {
+      showToast("中身を取り出してから風呂敷を売ってください。");
+      return;
+    }
     const value = Math.ceil(def.price / 2);
     state.coins += value;
     state.items = state.items.filter(x => x.id !== item.id);
@@ -773,6 +857,9 @@
 
       if (sdef.adjacentPowerBuff) {
         mods.powerMult += sdef.adjacentPowerBuff * amp;
+      }
+      if (sdef.containerPowerPerItem && source.stored?.length) {
+        mods.powerMult += sdef.containerPowerPerItem * source.stored.length * amp;
       }
       if (sdef.adjacentWeaponPowerBuff && def.action?.kind === "damage") {
         mods.powerMult += sdef.adjacentWeaponPowerBuff * amp;
