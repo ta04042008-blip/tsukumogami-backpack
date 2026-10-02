@@ -195,6 +195,39 @@
       name: "映し灯籠", w: 1, h: 1, price: 8, category: "support",
       description: "隣接する全道具の効果量+20%。",
       adjacentPowerBuff: 0.2
+    },
+
+    kaeshi_mirror: {
+      name: "付喪神・返し鏡", w: 1, h: 1, price: 10, category: "defense", tsukumogami: true,
+      description: "受けた災いを返す付喪神。被弾時9ダメージ反射。",
+      retaliation: 9
+    },
+    fire_eater_blade: {
+      name: "付喪神・火喰い刀", w: 1, h: 2, price: 11, category: "fire", rotatable: true, fire: true, tsukumogami: true,
+      description: "火を喰らう妖刀。2.4秒ごとに26の炎ダメージ。",
+      action: { kind: "damage", amount: 26, interval: 2400 }
+    },
+    bake_umbrella: {
+      name: "付喪神・化け傘", w: 1, h: 2, price: 10, category: "defense", rotatable: true, tsukumogami: true,
+      description: "身を守りつつ牙をむく。3.5秒ごとに結界20、被弾時3反射。",
+      action: { kind: "shield", amount: 20, interval: 3500 },
+      retaliation: 3
+    },
+    fire_wind_fan: {
+      name: "付喪神・火風の扇", w: 2, h: 1, price: 11, category: "fire", rotatable: true, fire: true, tsukumogami: true,
+      description: "火風を起こす付喪神。2.6秒ごとに18ダメージ、隣接CT-8%。",
+      action: { kind: "damage", amount: 18, interval: 2600 },
+      adjacentSpeedBuff: 0.08
+    },
+    ghost_lantern: {
+      name: "付喪神・幽灯籠", w: 1, h: 1, price: 11, category: "support", tsukumogami: true,
+      description: "妖しい光で周囲を強化。隣接道具の効果量+30%。",
+      adjacentPowerBuff: 0.3
+    },
+    medicine_eater_pot: {
+      name: "付喪神・薬喰い壺", w: 1, h: 1, price: 10, category: "heal", tsukumogami: true,
+      description: "薬気を蓄えた付喪神。5.5秒ごとにHP30回復。",
+      action: { kind: "heal", amount: 30, interval: 5500 }
     }
   };
 
@@ -229,6 +262,16 @@
     { a: "lit_lantern", b: "mirror", result: "reflecting_lantern" }
   ];
 
+  const AWAKEN_BATTLES = 3;
+  const AWAKENINGS = {
+    curse_return_mirror: "kaeshi_mirror",
+    flame_blade: "fire_eater_blade",
+    warding_umbrella: "bake_umbrella",
+    inferno_fan: "fire_wind_fan",
+    reflecting_lantern: "ghost_lantern",
+    secret_medicine: "medicine_eater_pot"
+  };
+
   const ENEMIES = [
     { name: "小鬼", hp: 65, attack: 6, interval: 2400, reward: 6 },
     { name: "一つ目小僧", hp: 90, attack: 7, interval: 2100, reward: 7 },
@@ -258,7 +301,8 @@
     [
       "turnLabel", "playerHpBar", "playerHpLabel", "coinLabel", "bagGrid", "selectionText",
       "rotateButton", "storageButton", "sellButton", "stagingArea", "stagingCount", "reactionList", "shopGrid",
-      "rerollButton", "enemyPreview", "battleButton", "recipeBook", "recipeProgress", "resetButton",
+      "rerollButton", "enemyPreview", "battleButton", "recipeBook", "recipeProgress",
+      "tsukumogamiBook", "tsukumogamiProgress", "resetButton",
       "battleModal", "battleEnemyName", "battleTimer", "enemyHpLabel", "enemyHpBar",
       "battlePlayerHpLabel", "battlePlayerHpBar", "shieldLabel", "battleLog", "battleResult",
       "battleResultTitle", "battleResultText", "battleCloseButton", "toast"
@@ -291,7 +335,8 @@
       inBattle: false,
       runOver: false,
       shop: ["hammer", "mirror", "flint", "oil"],
-      discovered: loadDiscovered()
+      discovered: loadDiscovered(),
+      tsukumogamiDiscovered: loadTsukumogamiDiscovered()
     };
 
     const starter = makeItem("sword", "bag");
@@ -314,7 +359,8 @@
       x: null,
       y: null,
       rot: 0,
-      stored: []
+      stored: [],
+      battlesUsed: 0
     };
   }
 
@@ -433,6 +479,7 @@
     renderReactions();
     renderShop();
     renderRecipeBook();
+    renderTsukumogamiBook();
     renderBattlePreview();
     renderSelection();
   }
@@ -475,9 +522,16 @@
             sub.className = "cell-sub";
             const { w, h } = dimensions(item);
             const capacity = def.containerCapacity || 0;
-            sub.textContent = capacity
-              ? `${w}×${h}｜包${item.stored?.length || 0}/${capacity}`
-              : `${w}×${h}`;
+            const awakeningTarget = AWAKENINGS[item.typeId];
+            if (capacity) {
+              sub.textContent = `${w}×${h}｜包${item.stored?.length || 0}/${capacity}`;
+            } else if (def.tsukumogami) {
+              sub.textContent = `${w}×${h}｜付喪神`;
+            } else if (awakeningTarget) {
+              sub.textContent = `${w}×${h}｜年${item.battlesUsed || 0}/${AWAKEN_BATTLES}`;
+            } else {
+              sub.textContent = `${w}×${h}`;
+            }
             label.appendChild(sub);
             cell.appendChild(label);
 
@@ -670,7 +724,12 @@
 
     const place = item.location === "bag" ? "カバン" : "仮置き場";
     const storedInfo = def.containerCapacity ? `｜収納 ${item.stored?.length || 0}/${def.containerCapacity}` : "";
-    el.selectionText.textContent = `${def.name}｜${place}${storedInfo}｜${def.description}`;
+    const awakeningInfo = def.tsukumogami
+      ? "｜付喪神"
+      : AWAKENINGS[item.typeId]
+        ? `｜使用年月 ${item.battlesUsed || 0}/${AWAKEN_BATTLES}`
+        : "";
+    el.selectionText.textContent = `${def.name}｜${place}${storedInfo}${awakeningInfo}｜${def.description}`;
   }
 
   function rotateSelected() {
@@ -797,9 +856,19 @@
     }
   }
 
+  function loadTsukumogamiDiscovered() {
+    try {
+      const raw = JSON.parse(localStorage.getItem("tsukumogami-awakened") || "[]");
+      return new Set(Array.isArray(raw) ? raw : []);
+    } catch {
+      return new Set();
+    }
+  }
+
   function saveDiscovered() {
     try {
       localStorage.setItem("tsukumogami-discovered", JSON.stringify([...state.discovered]));
+      localStorage.setItem("tsukumogami-awakened", JSON.stringify([...state.tsukumogamiDiscovered]));
     } catch {
       // Storage may be blocked; the run can still continue.
     }
@@ -820,6 +889,26 @@
         div.textContent = `No.${String(index + 1).padStart(2, "0")}　未発見レシピ`;
       }
       el.recipeBook.appendChild(div);
+    });
+  }
+
+  function renderTsukumogamiBook() {
+    const entries = Object.entries(AWAKENINGS);
+    el.tsukumogamiProgress.textContent = `${state.tsukumogamiDiscovered.size} / ${entries.length}`;
+    el.tsukumogamiBook.innerHTML = "";
+
+    entries.forEach(([sourceType, resultType], index) => {
+      const known = state.tsukumogamiDiscovered.has(resultType);
+      const div = document.createElement("div");
+      div.className = `recipe-entry${known ? " known-tsukumogami" : " locked"}`;
+
+      if (known) {
+        div.innerHTML = `<strong>${ITEM_DEFS[resultType].name}</strong><br>${ITEM_DEFS[sourceType].name}を${AWAKEN_BATTLES}戦使用`;
+      } else {
+        div.textContent = `付喪神 No.${String(index + 1).padStart(2, "0")}　未発見`;
+      }
+
+      el.tsukumogamiBook.appendChild(div);
     });
   }
 
@@ -1069,6 +1158,27 @@
     }
   }
 
+  function advanceUsageYears(reactions) {
+    const transformingIds = new Set(reactions.flatMap(r => [r.aId, r.bId]));
+    const awakenedNames = [];
+
+    for (const item of bagItems()) {
+      if (transformingIds.has(item.id)) continue;
+      const resultType = AWAKENINGS[item.typeId];
+      if (!resultType) continue;
+
+      item.battlesUsed = (item.battlesUsed || 0) + 1;
+      if (item.battlesUsed < AWAKEN_BATTLES) continue;
+
+      item.typeId = resultType;
+      item.battlesUsed = 0;
+      state.tsukumogamiDiscovered.add(resultType);
+      awakenedNames.push(ITEM_DEFS[resultType].name);
+    }
+
+    return awakenedNames;
+  }
+
   function finishBattle(win) {
     if (!battle || battle.finished) return;
     battle.finished = true;
@@ -1084,15 +1194,18 @@
       state.hp = Math.min(MAX_HP, state.hp + 20);
 
       const reactions = computeReactions();
+      const awakenings = advanceUsageYears(reactions);
       const changes = applyTransformations(reactions);
+      const changeText = changes.length ? " 道具変化：" + changes.join("、") : "";
+      const awakeningText = awakenings.length ? " 付喪神化：" + awakenings.join("、") : "";
 
       if (state.turn >= ENEMIES.length) {
         state.runOver = true;
-        resultText = `赤鬼を倒し、全5戦を踏破しました。${changes.length ? " 道具変化：" + changes.join("、") : ""}`;
+        resultText = `赤鬼を倒し、全5戦を踏破しました。${changeText}${awakeningText}`;
       } else {
         state.turn += 1;
         state.shop = randomShop();
-        resultText = `${reward}文を獲得。戦闘後にHPを20回復しました。${changes.length ? " 道具変化：" + changes.join("、") : ""}`;
+        resultText = `${reward}文を獲得。戦闘後にHPを20回復しました。${changeText}${awakeningText}`;
       }
 
       el.battleResultTitle.textContent = state.runOver ? "踏破！" : "勝利";
