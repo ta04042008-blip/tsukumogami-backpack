@@ -937,3 +937,38 @@ body.battle-mode .codex-drawer{
   0%,100%{filter:none}
   50%{filter:brightness(1.4) drop-shadow(0 0 8px #79b9dc)}
 }
+
+
+.staging-glyph{
+  width:24px;
+  height:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:2px;
+  border:2px solid #151014;
+  background:#b78a50;
+  color:#271820;
+  font-size:.68rem;
+  font-weight:900;
+  box-shadow:1px 1px 0 #080608;
+}
+
+.combat-scene.scene-transform{
+  animation:scene-transform-pulse .6s steps(4,end);
+}
+.combat-scene.scene-awaken{
+  animation:scene-awaken-pulse .9s steps(5,end);
+}
+@keyframes scene-transform-pulse{
+  0%,100%{filter:none}
+  35%{filter:brightness(1.55) saturate(1.25)}
+  65%{filter:brightness(.78) saturate(1.5)}
+}
+@keyframes scene-awaken-pulse{
+  0%,100%{filter:none}
+  20%{filter:brightness(1.7) hue-rotate(18deg)}
+  40%{filter:brightness(.8) hue-rotate(-12deg)}
+  60%{filter:brightness(1.9) saturate(1.6)}
+  80%{filter:brightness(1.2) hue-rotate(24deg)}
+}
