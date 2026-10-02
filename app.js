@@ -600,6 +600,7 @@
 
   function renderSelection() {
     const item = itemById(state.selectedId);
+    const previewType = !item ? state.previewType : null;
     const disabled = !item || state.inBattle || state.runOver;
     el.rotateButton.disabled = disabled || (!defOf(item).rotatable && !defOf(item).directional);
     el.sellButton.disabled = disabled;
@@ -607,7 +608,17 @@
     if (!item) {
       el.storageButton.disabled = true;
       el.storageButton.textContent = "収納";
-      el.selectionText.textContent = "道具を選択し、空いているマスをタップして配置します。";
+
+      if (previewType) {
+        renderItemDetail(null, previewType, "ショップ");
+      } else {
+        el.selectionText.textContent = "道具を選ぶと、ここに性能・変化・使用年月が表示されます。";
+        if (el.itemDetailName) el.itemDetailName.textContent = "道具を選択";
+        if (el.itemDetailGlyph) el.itemDetailGlyph.textContent = "?";
+        if (el.itemDetailStats) {
+          el.itemDetailStats.innerHTML = '<span class="detail-placeholder">カバンや入手品をタップしてください。</span>';
+        }
+      }
       return;
     }
 
@@ -629,6 +640,50 @@
         : "";
     const effectiveInfo = effectiveStatText(item);
     el.selectionText.textContent = `${def.name}｜${place}${storedInfo}${awakeningInfo}｜${def.description}${effectiveInfo ? "｜" + effectiveInfo : ""}`;
+    renderItemDetail(item, item.typeId, place);
+  }
+
+  function renderItemDetail(item, typeId, sourceLabel) {
+    const def = ITEM_DEFS[typeId];
+    if (!def || !el.itemDetailStats) return;
+
+    el.itemDetailName.textContent = def.name;
+    el.itemDetailGlyph.textContent = itemGlyph(typeId);
+    el.selectionText.textContent = def.description;
+
+    const fake = item || { typeId, rot: 0, location: "preview", stored: [], battlesUsed: 0 };
+    const dims = dimensions(fake);
+    const rows = [
+      ["分類", sourceLabel || def.category],
+      ["サイズ", `${dims.w}×${dims.h}`],
+      ["価値", `${def.price}文`]
+    ];
+
+    const effective = item ? effectiveStatText(item) : "";
+    if (effective) rows.push(["実効", effective.replace(/^現在:\s*/, "")]);
+
+    if (AWAKENINGS[typeId]) {
+      rows.push(["使用年月", `${item?.battlesUsed || 0}/${AWAKEN_BATTLES}戦`]);
+    } else if (def.tsukumogami) {
+      rows.push(["状態", "付喪神"]);
+    }
+
+    const related = RECIPES.filter(recipe => recipe.a === typeId || recipe.b === typeId).slice(0, 3);
+    if (related.length) {
+      const text = related.map(recipe => {
+        const partner = recipe.a === typeId ? recipe.b : recipe.a;
+        const known = state.discovered.has(recipeKey(recipe));
+        return `${ITEM_DEFS[partner].name} → ${known ? ITEM_DEFS[recipe.result].name : "？？？"}`;
+      }).join(" / ");
+      rows.push(["変化", text]);
+    }
+
+    if (def.directionalPowerBuff) rows.push(["向き", "正面1マスに効果"]);
+    if (def.containerCapacity) rows.push(["収納", `${item?.stored?.length || 0}/${def.containerCapacity}`]);
+
+    el.itemDetailStats.innerHTML = rows.map(([label, value]) =>
+      `<div class="detail-stat"><b>${label}</b><span>${value}</span></div>`
+    ).join("");
   }
 
   function rotateSelected() {
