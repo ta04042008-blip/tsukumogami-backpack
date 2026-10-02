@@ -10,6 +10,37 @@
   };
 
   let dragging = null;
+  let suppressClickUntil = 0;
+
+  function interactionApi() {
+    return window.TSUKUMOGAMI_INTERACTION || null;
+  }
+
+  function itemIdFromSource(source) {
+    return source?.dataset?.itemId || null;
+  }
+
+  function targetInfoFromNode(node) {
+    if (!node) return null;
+    if (node.matches?.(".bag-cell")) {
+      return {
+        kind: "bag",
+        x: Number(node.dataset.x),
+        y: Number(node.dataset.y)
+      };
+    }
+    if (node.matches?.(".staging-slot:not(.filled)")) {
+      return { kind: "staging" };
+    }
+    return null;
+  }
+
+  function dropValidity(itemId, targetNode) {
+    const api = interactionApi();
+    const target = targetInfoFromNode(targetNode);
+    if (!api || !itemId || !target) return false;
+    return Boolean(api.canDrop(itemId, target));
+  }
 
   function refreshDraggables(root = document) {
     root.querySelectorAll(selectors.draggable).forEach(node => {
@@ -19,27 +50,39 @@
   }
 
   function clearDropTargets() {
-    document.querySelectorAll(".drop-target").forEach(node => node.classList.remove("drop-target"));
+    document.querySelectorAll(".drop-target, .drop-valid, .drop-invalid").forEach(node => {
+      node.classList.remove("drop-target", "drop-valid", "drop-invalid");
+    });
+  }
+
+  function markDropTarget(target, valid) {
+    clearDropTargets();
+    if (!target) return;
+    target.classList.add("drop-target", valid ? "drop-valid" : "drop-invalid");
   }
 
   document.addEventListener("dragstart", event => {
     const source = event.target.closest(selectors.draggable);
     if (!source) return;
 
-    dragging = source;
-    source.classList.add("dragging");
+    const itemId = itemIdFromSource(source);
+    if (!itemId || !interactionApi()?.selectForDrag(itemId)) {
+      event.preventDefault();
+      return;
+    }
 
-    // Reuse the core game's existing selection behavior.
-    source.click();
+    dragging = { source, itemId };
+    source.classList.add("dragging");
 
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", "tsukumogami-item");
+      event.dataTransfer.setData("text/plain", itemId);
     }
   });
 
   document.addEventListener("dragend", () => {
-    if (dragging) dragging.classList.remove("dragging");
+    if (dragging?.source) dragging.source.classList.remove("dragging");
+    interactionApi()?.cancelDragSelection();
     dragging = null;
     clearDropTargets();
   });
@@ -49,10 +92,10 @@
     if (!target || !dragging) return;
 
     event.preventDefault();
-    clearDropTargets();
-    target.classList.add("drop-target");
+    const valid = dropValidity(dragging.itemId, target);
+    markDropTarget(target, valid);
 
-    if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+    if (event.dataTransfer) event.dataTransfer.dropEffect = valid ? "move" : "none";
   });
 
   document.addEventListener("dragleave", event => {
@@ -63,14 +106,17 @@
   });
 
   document.addEventListener("drop", event => {
-    const target = event.target.closest(`${selectors.bagDrop}, ${selectors.stagingDrop}`);
-    if (!target || !dragging) return;
+    const targetNode = event.target.closest(`${selectors.bagDrop}, ${selectors.stagingDrop}`);
+    if (!targetNode || !dragging) return;
 
     event.preventDefault();
+    const target = targetInfoFromNode(targetNode);
+    if (target && dropValidity(dragging.itemId, targetNode)) {
+      interactionApi()?.drop(dragging.itemId, target);
+    } else {
+      interactionApi()?.cancelDragSelection();
+    }
     clearDropTargets();
-
-    // Reuse the core game's placement behavior.
-    target.click();
   });
 
   // Pointer-based drag for phones/tablets. HTML5 drag events are unreliable on iOS,
@@ -86,32 +132,56 @@
     return ghost;
   }
 
-  function moveTouchGhost(ghost, x, y, target) {
+  function moveTouchGhost(ghost, x, y, target, valid) {
     if (!ghost) return;
     ghost.style.left = `${x}px`;
     ghost.style.top = `${y - 58}px`;
-    ghost.classList.toggle("can-drop", Boolean(target && !target.classList.contains("place-invalid")));
-    ghost.classList.toggle("cannot-drop", Boolean(target?.classList.contains("place-invalid")));
+    ghost.classList.toggle("can-drop", Boolean(target && valid));
+    ghost.classList.toggle("cannot-drop", Boolean(target && !valid));
   }
 
   function removeTouchGhost(ghost) {
     if (ghost?.isConnected) ghost.remove();
   }
 
+  function cleanupPointerDrag({ suppressClick = false } = {}) {
+    if (!pointerDrag) return;
+    const drag = pointerDrag;
+    pointerDrag = null;
+
+    drag.source?.classList.remove("dragging");
+    removeTouchGhost(drag.ghost);
+    document.body.classList.remove("touch-drag-active");
+    clearDropTargets();
+    interactionApi()?.cancelDragSelection();
+
+    if (suppressClick) suppressClickUntil = performance.now() + 500;
+  }
+
   document.addEventListener("pointerdown", event => {
-    if (event.pointerType === "mouse") return;
+    if (event.pointerType === "mouse" || event.isPrimary === false || pointerDrag) return;
     const source = event.target.closest(selectors.draggable);
     if (!source) return;
+
+    const itemId = itemIdFromSource(source);
+    if (!itemId) return;
 
     pointerDrag = {
       id: event.pointerId,
       source,
+      itemId,
       startX: event.clientX,
       startY: event.clientY,
       active: false,
       target: null,
       ghost: null
     };
+
+    try {
+      source.setPointerCapture?.(event.pointerId);
+    } catch {
+      // Pointer capture is an optimization, not a requirement.
+    }
   }, { passive: true });
 
   document.addEventListener("pointermove", event => {
@@ -122,46 +192,67 @@
     if (!pointerDrag.active && Math.hypot(dx, dy) < 9) return;
 
     if (!pointerDrag.active) {
+      if (!interactionApi()?.selectForDrag(pointerDrag.itemId)) {
+        cleanupPointerDrag();
+        return;
+      }
       pointerDrag.active = true;
       pointerDrag.ghost = createTouchGhost(pointerDrag.source);
       pointerDrag.source.classList.add("dragging");
-      pointerDrag.source.click();
       document.body.classList.add("touch-drag-active");
     }
 
     event.preventDefault();
-    clearDropTargets();
 
     const underPointer = document.elementFromPoint(event.clientX, event.clientY);
     const target = underPointer?.closest?.(`${selectors.bagDrop}, ${selectors.stagingDrop}`) || null;
+    const valid = dropValidity(pointerDrag.itemId, target);
     pointerDrag.target = target;
-    if (target) target.classList.add("drop-target");
-    moveTouchGhost(pointerDrag.ghost, event.clientX, event.clientY, target);
+    markDropTarget(target, valid);
+    moveTouchGhost(pointerDrag.ghost, event.clientX, event.clientY, target, valid);
   }, { passive: false });
 
   function finishPointerDrag(event) {
     if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
     const drag = pointerDrag;
-    pointerDrag = null;
 
-    if (drag.active) {
-      event.preventDefault();
-      drag.source.classList.remove("dragging");
-      clearDropTargets();
-      removeTouchGhost(drag.ghost);
-      document.body.classList.remove("touch-drag-active");
-      if (drag.target?.isConnected) drag.target.click();
+    if (!drag.active) {
+      pointerDrag = null;
+      return;
     }
+
+    event.preventDefault();
+    const target = targetInfoFromNode(drag.target);
+    if (drag.target?.isConnected && target && dropValidity(drag.itemId, drag.target)) {
+      interactionApi()?.drop(drag.itemId, target);
+    } else {
+      interactionApi()?.cancelDragSelection();
+    }
+
+    cleanupPointerDrag({ suppressClick: true });
   }
 
   document.addEventListener("pointerup", finishPointerDrag, { passive: false });
   document.addEventListener("pointercancel", event => {
     if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
-    pointerDrag.source.classList.remove("dragging");
-    removeTouchGhost(pointerDrag.ghost);
-    document.body.classList.remove("touch-drag-active");
-    pointerDrag = null;
-    clearDropTargets();
+    cleanupPointerDrag({ suppressClick: pointerDrag.active });
+  });
+
+  document.addEventListener("lostpointercapture", event => {
+    if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
+    cleanupPointerDrag({ suppressClick: pointerDrag.active });
+  }, true);
+
+  document.addEventListener("click", event => {
+    if (performance.now() >= suppressClickUntil) return;
+    if (!event.target.closest(selectors.draggable)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+
+  window.addEventListener("blur", () => cleanupPointerDrag({ suppressClick: Boolean(pointerDrag?.active) }));
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) cleanupPointerDrag({ suppressClick: Boolean(pointerDrag?.active) });
   });
 
   // app.js rebuilds bag/staging DOM frequently, so keep draggable attributes current.
