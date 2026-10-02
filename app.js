@@ -191,6 +191,89 @@
     return true;
   }
 
+  function cellsOverlap(firstCells, secondCells) {
+    const firstSet = new Set(firstCells.map(cell => `${cell.x},${cell.y}`));
+    return secondCells.some(cell => firstSet.has(`${cell.x},${cell.y}`));
+  }
+
+  function canSwapItems(first, second) {
+    if (!first || !second || first.id === second.id) return false;
+    if (first.location !== "bag" || second.location !== "bag") return false;
+
+    const ignoreIds = new Set([first.id, second.id]);
+    if (!canPlaceIgnoring(first, second.x, second.y, first.rot, ignoreIds)) return false;
+    if (!canPlaceIgnoring(second, first.x, first.y, second.rot, ignoreIds)) return false;
+
+    const firstAfter = cellsFor(first, second.x, second.y, first.rot);
+    const secondAfter = cellsFor(second, first.x, first.y, second.rot);
+    return !cellsOverlap(firstAfter, secondAfter);
+  }
+
+  function dragTargetCanAccept(itemId, target) {
+    const item = itemById(itemId);
+    if (!item || state.inBattle || state.runOver || !target) return false;
+
+    if (target.kind === "bag") {
+      if (!Number.isInteger(target.x) || !Number.isInteger(target.y)) return false;
+      const occupied = itemAt(target.x, target.y);
+      if (!occupied) return canPlace(item, target.x, target.y, item.rot, item.id);
+      if (occupied.id === item.id) return true;
+      return canSwapItems(item, occupied);
+    }
+
+    if (target.kind === "staging") {
+      return item.location === "bag" && stagingItems().length < STAGING_LIMIT;
+    }
+
+    return false;
+  }
+
+  function performDragDrop(itemId, target) {
+    const item = itemById(itemId);
+    if (!item || !dragTargetCanAccept(itemId, target)) {
+      state.selectedId = null;
+      state.previewType = null;
+      renderAll();
+      return false;
+    }
+
+    if (target.kind === "bag") {
+      const occupied = itemAt(target.x, target.y);
+      if (occupied && occupied.id !== item.id) {
+        const sx = item.x;
+        const sy = item.y;
+        item.x = occupied.x;
+        item.y = occupied.y;
+        occupied.x = sx;
+        occupied.y = sy;
+        showToast("道具の位置を入れ替えました。");
+      } else if (!occupied) {
+        item.location = "bag";
+        item.x = target.x;
+        item.y = target.y;
+      }
+    } else if (target.kind === "staging") {
+      item.location = "staging";
+      item.x = null;
+      item.y = null;
+    }
+
+    state.selectedId = null;
+    state.previewType = null;
+    document.body.classList.remove("has-item-detail");
+    renderAll();
+    return true;
+  }
+
+  function selectForDrag(itemId) {
+    const item = itemById(itemId);
+    if (!item || state.inBattle || state.runOver) return false;
+    state.selectedId = item.id;
+    state.previewType = null;
+    document.body.classList.remove("has-item-detail");
+    return true;
+  }
+
   function areAdjacent(a, b) {
     if (a.location !== "bag" || b.location !== "bag") return false;
     const bSet = new Set(cellsFor(b).map(c => `${c.x},${c.y}`));
@@ -339,6 +422,8 @@
         const cell = document.createElement("button");
         cell.type = "button";
         cell.className = "bag-cell";
+        cell.dataset.x = String(x);
+        cell.dataset.y = String(y);
 
         const item = itemAt(x, y);
         if (!item) {
@@ -472,22 +557,16 @@
         const selected = itemById(state.selectedId);
         const target = itemById(occupiedId);
 
-        if (selected?.location === "bag" && target?.location === "bag") {
-          const ignoreIds = new Set([selected.id, target.id]);
-          const selectedCanMove = canPlaceIgnoring(selected, target.x, target.y, selected.rot, ignoreIds);
-          const targetCanMove = canPlaceIgnoring(target, selected.x, selected.y, target.rot, ignoreIds);
-
-          if (selectedCanMove && targetCanMove) {
-            const sx = selected.x;
-            const sy = selected.y;
-            selected.x = target.x;
-            selected.y = target.y;
-            target.x = sx;
-            target.y = sy;
-            showToast("道具の位置を入れ替えました。");
-            renderAll();
-            return;
-          }
+        if (canSwapItems(selected, target)) {
+          const sx = selected.x;
+          const sy = selected.y;
+          selected.x = target.x;
+          selected.y = target.y;
+          target.x = sx;
+          target.y = sy;
+          showToast("道具の位置を入れ替えました。");
+          renderAll();
+          return;
         }
       }
 
@@ -520,11 +599,13 @@
       const slot = document.createElement("button");
       slot.type = "button";
       slot.className = "staging-slot";
+      slot.dataset.stagingIndex = String(i);
       const item = staged[i];
 
       if (item) {
         const def = defOf(item);
         slot.classList.add("filled");
+        slot.dataset.itemId = item.id;
         if (item.id === state.selectedId) slot.classList.add("selected");
         slot.innerHTML = `<span class="staging-glyph">${itemGlyph(item)}</span><strong>${shortItemName(item)}</strong><span>${dimensions(item).w}×${dimensions(item).h}</span>`;
         slot.addEventListener("click", () => {
@@ -848,7 +929,7 @@
         </div>
       `;
       card.addEventListener("click", event => {
-        if (event.target.closest("button")) return;
+        if (event.target.closest("button") || state.inBattle || state.runOver) return;
         state.selectedId = null;
         state.previewType = typeId;
         renderSelection();
@@ -1534,4 +1615,16 @@
     el.toast.classList.add("show");
     toastTimer = setTimeout(() => el.toast.classList.remove("show"), 2200);
   }
+
+  window.TSUKUMOGAMI_INTERACTION = {
+    selectForDrag,
+    canDrop: dragTargetCanAccept,
+    drop: performDragDrop,
+    cancelDragSelection() {
+      if (!state) return;
+      state.selectedId = null;
+      state.previewType = null;
+      document.body.classList.remove("has-item-detail");
+    }
+  };
 })();
