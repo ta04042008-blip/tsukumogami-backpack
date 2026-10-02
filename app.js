@@ -739,12 +739,19 @@
           <h3>${def.name}</h3>
           <span class="rarity-badge ${rarity.className}">${rarity.label}</span>
         </div>
+        <div class="shop-sprite" aria-hidden="true">${itemGlyph(typeId)}</div>
         <p>${def.description}</p>
         <div class="shop-footer">
           <span class="price">${def.price}文</span>
           <button type="button">買う</button>
         </div>
       `;
+      card.addEventListener("click", event => {
+        if (event.target.closest("button")) return;
+        state.selectedId = null;
+        state.previewType = typeId;
+        renderSelection();
+      });
       const button = card.querySelector("button");
       button.disabled = state.runOver || state.inBattle || state.coins < def.price || stagingItems().length >= STAGING_LIMIT;
       button.addEventListener("click", () => buyItem(index));
@@ -775,6 +782,7 @@
     const item = makeItem(typeId, "staging");
     state.items.push(item);
     state.shop[index] = null;
+    state.previewType = null;
     state.selectedId = item.id;
     showToast(`${def.name}を購入しました。`);
     renderAll();
@@ -816,6 +824,19 @@
     const enemy = ENEMIES[Math.min(state.turn - 1, ENEMIES.length - 1)];
     const battleType = enemy.boss ? "BOSS" : "ENCOUNTER";
     el.enemyPreview.textContent = `第${enemy.act || 1}幕 / ${battleType}　${enemy.name}　HP ${enemy.hp}`;
+    if (el.sceneEnemyName) el.sceneEnemyName.textContent = enemy.name;
+    if (el.enemySprite) {
+      const span = el.enemySprite.querySelector("span");
+      if (span) span.textContent = enemy.name.slice(0, 1);
+      el.enemySprite.classList.toggle("boss-sprite", Boolean(enemy.boss));
+    }
+    if (el.enemyTrait) {
+      const traits = [];
+      if (enemy.boss) traits.push(enemy.finalBoss ? "最終ボス" : "幕ボス");
+      if (enemy.reduction) traits.push(`軽減${Math.round(enemy.reduction * 100)}%`);
+      if (enemy.heavy) traits.push("強攻撃");
+      el.enemyTrait.textContent = traits.length ? traits.join("・") : "妖怪";
+    }
 
     if (state.runOver) {
       el.battleButton.disabled = true;
