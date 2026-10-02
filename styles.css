@@ -233,3 +233,94 @@ footer{text-align:center;color:#777;font-size:.72rem;padding-top:16px}
 .tsukumogami-section .recipe-entry.known-tsukumogami strong{
   color:#e4bfef;
 }
+
+
+/* Shop rarity */
+.shop-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+.shop-title-row h3{margin:0}
+.rarity-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:28px;
+  height:24px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  font-size:.68rem;
+  font-weight:900;
+}
+.rarity-common.rarity-badge{
+  color:#d8d3c8;
+  background:#292d2f;
+}
+.rarity-uncommon.rarity-badge{
+  color:#b9d5c0;
+  background:#26352d;
+  border-color:#496754;
+}
+.rarity-rare.rarity-badge{
+  color:#e5c9ff;
+  background:#34283d;
+  border-color:#76558d;
+}
+.shop-item.rarity-uncommon{border-color:#40594a}
+.shop-item.rarity-rare{
+  border-color:#694b7d;
+  box-shadow:inset 0 0 0 1px rgba(183,137,215,.08);
+}
+
+/* Battle backpack */
+.battle-loadout{
+  margin:10px 0 12px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#101213;
+}
+.battle-loadout-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  margin-bottom:8px;
+  color:var(--muted);
+  font-size:.72rem;
+}
+.battle-loadout-head small{font-size:.64rem}
+.battle-bag{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:4px;
+}
+.battle-bag-cell{
+  aspect-ratio:1/1;
+  min-width:0;
+  border:1px solid #323739;
+  border-radius:6px;
+  background:#171a1b;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  transition:transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+.battle-bag-cell span{
+  font-size:.55rem;
+  font-weight:800;
+  white-space:nowrap;
+}
+.battle-bag-cell.filled.weapon{background:#45302c}
+.battle-bag-cell.filled.support{background:#304038}
+.battle-bag-cell.filled.defense{background:#303c45}
+.battle-bag-cell.filled.heal{background:#394532}
+.battle-bag-cell.filled.fire{background:#4d3425}
+.battle-bag-cell.active{
+  transform:scale(1.06);
+  box-shadow:0 0 0 2px #f1c57b, 0 0 18px rgba(241,197,123,.45);
+  filter:brightness(1.35);
+}
