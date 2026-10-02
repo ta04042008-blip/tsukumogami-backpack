@@ -1187,3 +1187,446 @@ body.battle-mode .codex-drawer{
     height:64px;
   }
 }
+
+
+/* Transformation links: a vermilion cord makes the active next-turn pair readable at a glance. */
+.reaction-links{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:8;
+  overflow:visible;
+}
+.reaction-link-line{
+  stroke:#dc7547;
+  stroke-width:3;
+  stroke-linecap:square;
+  stroke-dasharray:5 4;
+  filter:drop-shadow(1px 1px 0 #120c0d);
+  animation:reaction-cord-pulse .8s steps(2,end) infinite;
+}
+.reaction-link-seal{
+  fill:#f1c16a;
+  stroke:#6e2e27;
+  stroke-width:2;
+  filter:drop-shadow(1px 1px 0 #120c0d);
+}
+@keyframes reaction-cord-pulse{
+  0%,49%{opacity:.72}
+  50%,100%{opacity:1}
+}
+.backpack-frame .bag-grid{
+  position:relative;
+  z-index:2;
+}
+.backpack-frame .bag-cell{
+  position:relative;
+  z-index:3;
+}
+.backpack-frame .bag-cell .cell-label,
+.backpack-frame .bag-cell .direction-arrow{
+  position:relative;
+  z-index:10;
+}
+.detail-close{
+  display:none;
+}
+
+/* Tall phone playfield: route, encounter, backpack, shop and start all fit in one viewport.
+   Short phones keep the normal scroll layout rather than crushing the backpack. */
+@media (max-width:520px) and (min-height:680px){
+  html,
+  body{
+    height:100%;
+    overflow:hidden;
+    overscroll-behavior:none;
+  }
+
+  body{
+    padding:0;
+  }
+
+  .ui-v2{
+    --screen-gap:4px;
+    box-sizing:border-box;
+    width:100%;
+    height:100dvh;
+    max-height:100dvh;
+    padding:
+      calc(env(safe-area-inset-top) + 3px)
+      5px
+      calc(env(safe-area-inset-bottom) + 3px);
+    display:grid;
+    grid-template-rows:68px 132px minmax(0,1fr) 108px 58px;
+    gap:var(--screen-gap);
+    overflow:hidden;
+  }
+
+  .game-titlebar,
+  .codex-drawer,
+  .ui-v2 > footer{
+    display:none;
+  }
+
+  .stage-header,
+  .combat-scene,
+  .prep-layout,
+  .shelf-card,
+  .start-panel{
+    margin:0;
+    min-height:0;
+  }
+
+  .stage-header{
+    padding:5px 7px;
+    overflow:hidden;
+  }
+
+  .stage-title-row{
+    min-height:25px;
+    margin-bottom:3px;
+    align-items:center;
+  }
+
+  .stage-title-row .eyebrow{
+    display:none;
+  }
+
+  .stage-title-row strong{
+    font-size:.72rem;
+  }
+
+  .currency-box{
+    padding:3px 5px;
+    border-width:2px;
+  }
+
+  .currency-box span{
+    display:none;
+  }
+
+  .currency-box strong{
+    font-size:.72rem;
+  }
+
+  .stage-map{
+    min-height:26px;
+    gap:2px;
+  }
+
+  .stage-node{
+    font-size:.45rem;
+  }
+
+  .combat-scene{
+    height:132px;
+    min-height:132px;
+    padding:5px 7px;
+  }
+
+  .scene-info{
+    gap:3px;
+  }
+
+  .scene-info .eyebrow{
+    display:none;
+  }
+
+  .scene-info strong{
+    font-size:.62rem;
+  }
+
+  .scene-player-hp{
+    grid-template-columns:auto minmax(70px,1fr) auto;
+    font-size:.54rem;
+  }
+
+  .fighters{
+    height:88px;
+    min-height:88px;
+    padding:0 8px;
+    align-items:end;
+  }
+
+  .fighter{
+    justify-content:flex-end;
+    height:80px;
+  }
+
+  .pixel-fighter{
+    width:64px;
+    height:64px;
+  }
+
+  .versus-mark{
+    margin-bottom:21px;
+    font-size:.72rem;
+  }
+
+  .prep-layout{
+    display:block;
+    overflow:hidden;
+  }
+
+  .inventory-board{
+    box-sizing:border-box;
+    width:100%;
+    height:100%;
+    padding:5px 6px;
+    display:grid;
+    grid-template-rows:30px 40px minmax(0,1fr);
+    gap:3px;
+    overflow:hidden;
+  }
+
+  .inventory-topbar{
+    min-height:0;
+    margin:0;
+    align-items:center;
+  }
+
+  .inventory-topbar h2{
+    font-size:.72rem;
+  }
+
+  .selection-actions{
+    gap:2px;
+  }
+
+  .selection-actions button{
+    min-height:28px;
+    padding:3px 5px;
+    font-size:.52rem;
+  }
+
+  .staging-strip{
+    min-height:0;
+    margin:0;
+    padding:2px 4px;
+    overflow:hidden;
+  }
+
+  .strip-label{
+    height:12px;
+    margin:0 0 1px;
+    font-size:.48rem;
+  }
+
+  .staging-slot{
+    min-height:24px;
+    height:24px;
+    padding:1px;
+    overflow:hidden;
+  }
+
+  .staging-slot strong,
+  .staging-slot > span:not(.staging-glyph){
+    display:none;
+  }
+
+  .staging-glyph{
+    width:18px;
+    height:18px;
+    margin:0;
+    border-width:1px;
+    font-size:.52rem;
+  }
+
+  .backpack-frame{
+    align-self:center;
+    justify-self:center;
+    box-sizing:border-box;
+    width:min(100%, calc((100dvh - 425px) * 1.2));
+    max-width:390px;
+    min-width:280px;
+    padding:6px 5px 7px;
+    border-width:3px;
+    overflow:visible;
+  }
+
+  .backpack-frame::before,
+  .backpack-frame::after{
+    height:7px;
+    top:-5px;
+    border-width:2px;
+  }
+
+  .backpack-frame .bag-grid{
+    gap:2px;
+    padding:2px;
+  }
+
+  .cell-item-name,
+  .cell-sub{
+    display:none;
+  }
+
+  .item-glyph{
+    width:20px;
+    height:20px;
+    border-width:1px;
+    font-size:.58rem;
+  }
+
+  .legend{
+    display:none;
+  }
+
+  .prep-sidebar{
+    display:none;
+  }
+
+  body.has-item-detail .prep-sidebar{
+    position:fixed;
+    z-index:80;
+    left:7px;
+    right:7px;
+    bottom:calc(env(safe-area-inset-bottom) + 64px);
+    display:block;
+    max-height:42dvh;
+    overflow:auto;
+    filter:drop-shadow(5px 6px 0 rgba(0,0,0,.6));
+  }
+
+  body.has-item-detail .prep-sidebar .reaction-card{
+    display:none;
+  }
+
+  body.has-item-detail .item-detail-card{
+    position:relative;
+    max-height:42dvh;
+    overflow:auto;
+  }
+
+  .detail-close{
+    display:block;
+    position:absolute;
+    right:5px;
+    top:5px;
+    width:30px;
+    height:30px;
+    min-height:30px;
+    padding:0;
+    z-index:4;
+    font-size:1rem;
+  }
+
+  .detail-glyph{
+    margin-right:34px;
+  }
+
+  .shelf-card{
+    height:108px;
+    padding:4px 5px;
+    overflow:hidden;
+  }
+
+  .shop-heading{
+    height:24px;
+    margin:0 0 2px;
+    align-items:center;
+  }
+
+  .shop-heading .eyebrow{
+    display:none;
+  }
+
+  .shop-heading h2{
+    font-size:.68rem;
+  }
+
+  .shop-heading button{
+    min-height:22px;
+    padding:2px 5px;
+    font-size:.5rem;
+  }
+
+  .shop-shelf{
+    height:76px;
+    padding:3px;
+    gap:3px;
+    border-width:2px;
+  }
+
+  .shop-shelf .shop-item{
+    min-height:0;
+    height:68px;
+    padding:2px;
+  }
+
+  .shop-title-row h3{
+    font-size:.48rem;
+  }
+
+  .shop-sprite{
+    width:27px;
+    height:27px;
+    margin:0 auto;
+    border-width:2px;
+    font-size:.72rem;
+  }
+
+  .shop-footer{
+    display:flex;
+    gap:2px;
+  }
+
+  .shop-footer .price{
+    font-size:.48rem;
+  }
+
+  .shop-footer button{
+    width:auto;
+    min-height:20px;
+    padding:2px 4px;
+    font-size:.48rem;
+  }
+
+  .rarity-badge{
+    width:15px;
+    min-width:15px;
+    height:15px;
+    font-size:.4rem;
+  }
+
+  .start-panel{
+    position:static;
+    height:58px;
+    padding:5px 6px;
+    box-sizing:border-box;
+  }
+
+  .start-panel .eyebrow,
+  .start-panel > div > span{
+    display:none;
+  }
+
+  .start-panel strong{
+    font-size:.56rem;
+  }
+
+  .start-button{
+    min-width:126px;
+    height:42px;
+    padding:5px 10px;
+    font-size:.82rem;
+  }
+
+  .inline-battle{
+    position:fixed;
+    z-index:70;
+    left:5px;
+    right:5px;
+    top:calc(env(safe-area-inset-top) + 72px);
+    bottom:calc(env(safe-area-inset-bottom) + 5px);
+    margin:0;
+    overflow:auto;
+    background:rgba(11,8,12,.94);
+  }
+
+  .inline-battle .battle-panel{
+    min-height:100%;
+  }
+}
