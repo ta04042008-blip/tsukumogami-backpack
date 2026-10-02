@@ -67,6 +67,7 @@
       inBattle: false,
       runOver: false,
       shop: ["hammer", "mirror", "flint", "oil"],
+      rerollCount: 0,
       reactionPreference: {},
       discovered: loadDiscovered(),
       tsukumogamiDiscovered: loadTsukumogamiDiscovered()
@@ -648,7 +649,9 @@
       el.shopGrid.appendChild(card);
     });
 
-    el.rerollButton.disabled = state.runOver || state.inBattle || state.coins < 1;
+    const cost = rerollCost();
+    el.rerollButton.textContent = `品揃え更新 ${cost}文`;
+    el.rerollButton.disabled = state.runOver || state.inBattle || state.coins < cost;
   }
 
   function buyItem(index) {
@@ -675,9 +678,16 @@
     renderAll();
   }
 
+  function rerollCost() {
+    const schedule = [1, 1, 2, 3, 4];
+    return schedule[Math.min(state.rerollCount || 0, schedule.length - 1)];
+  }
+
   function rerollShop() {
-    if (state.inBattle || state.runOver || state.coins < 1) return;
-    state.coins -= 1;
+    const cost = rerollCost();
+    if (state.inBattle || state.runOver || state.coins < cost) return;
+    state.coins -= cost;
+    state.rerollCount = (state.rerollCount || 0) + 1;
     state.shop = randomShop();
     renderAll();
   }
@@ -840,6 +850,8 @@
       }
     }
 
+    mods.powerMult = Math.min(mods.powerMult, 2);
+    mods.intervalMult = Math.max(mods.intervalMult, 0.5);
     return mods;
   }
 
@@ -1011,13 +1023,17 @@
         logBattle(`${def.name}の濁りで${action.selfDamage}ダメージ`);
       }
     } else if (action.kind === "shield") {
-      battle.shield += power;
-      logBattle(`${def.name} → 結界+${power}`);
+      const before = battle.shield;
+      battle.shield = Math.min(MAX_HP * 0.5, battle.shield + power);
+      const gained = Math.max(0, Math.round(battle.shield - before));
+      logBattle(`${def.name} → 結界+${gained}`);
     } else if (action.kind === "hybrid") {
       const dealt = applyEnemyDamage(power);
       const shield = Math.max(1, Math.round(action.shield * mods.powerMult));
-      battle.shield += shield;
-      logBattle(`${def.name} → ${dealt}ダメージ / 結界+${shield}`);
+      const before = battle.shield;
+      battle.shield = Math.min(MAX_HP * 0.5, battle.shield + shield);
+      const gained = Math.max(0, Math.round(battle.shield - before));
+      logBattle(`${def.name} → ${dealt}ダメージ / 結界+${gained}`);
     }
 
     updateBattleUi(performance.now() - battle.startedAt);
@@ -1123,6 +1139,7 @@
       } else {
         state.turn += 1;
         state.shop = randomShop();
+        state.rerollCount = 0;
         resultText = `${reward}文を獲得。戦闘後にHPを20回復しました。${changeText}${awakeningText}`;
       }
 
