@@ -580,7 +580,7 @@
   function renderSelection() {
     const item = itemById(state.selectedId);
     const disabled = !item || state.inBattle || state.runOver;
-    el.rotateButton.disabled = disabled || !defOf(item).rotatable;
+    el.rotateButton.disabled = disabled || (!defOf(item).rotatable && !defOf(item).directional);
     el.sellButton.disabled = disabled;
 
     if (!item) {
