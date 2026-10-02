@@ -785,6 +785,41 @@
     renderAll();
   }
 
+  function effectiveStatText(item) {
+    if (!item) return "";
+    const def = defOf(item);
+    const mods = item.location === "bag"
+      ? getModifiers(item)
+      : { powerMult: 1, intervalMult: 1, extraDamage: 0 };
+
+    if (def.action) {
+      const interval = (def.action.interval * mods.intervalMult / 1000).toFixed(1);
+      const amount = Math.max(
+        1,
+        Math.round(def.action.amount * mods.powerMult + (def.action.kind === "damage" ? mods.extraDamage : 0))
+      );
+
+      if (def.action.kind === "damage") return `現在: ${amount}ダメージ / ${interval}秒`;
+      if (def.action.kind === "heal") return `現在: HP${amount}回復 / ${interval}秒`;
+      if (def.action.kind === "shield") return `現在: 結界${amount} / ${interval}秒`;
+      if (def.action.kind === "hybrid") {
+        const shield = Math.max(1, Math.round(def.action.shield * mods.powerMult));
+        return `現在: ${amount}ダメージ + 結界${shield} / ${interval}秒`;
+      }
+    }
+
+    if (def.retaliation) {
+      const amount = Math.max(1, Math.round(def.retaliation * mods.powerMult));
+      return `現在: 被弾時${amount}反撃`;
+    }
+
+    if (def.containerCapacity) {
+      return `現在: ${item.stored?.length || 0}/${def.containerCapacity}収納`;
+    }
+
+    return "";
+  }
+
   function renderSelection() {
     const item = itemById(state.selectedId);
     const disabled = !item || state.inBattle || state.runOver;
@@ -814,7 +849,8 @@
       : AWAKENINGS[item.typeId]
         ? `｜使用年月 ${item.battlesUsed || 0}/${AWAKEN_BATTLES}`
         : "";
-    el.selectionText.textContent = `${def.name}｜${place}${storedInfo}${awakeningInfo}｜${def.description}`;
+    const effectiveInfo = effectiveStatText(item);
+    el.selectionText.textContent = `${def.name}｜${place}${storedInfo}${awakeningInfo}｜${def.description}${effectiveInfo ? "｜" + effectiveInfo : ""}`;
   }
 
   function rotateSelected() {
