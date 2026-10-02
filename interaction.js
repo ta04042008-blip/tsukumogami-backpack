@@ -73,6 +73,68 @@
     target.click();
   });
 
+  // Pointer-based drag for phones/tablets. HTML5 drag events are unreliable on iOS,
+  // so this mirrors the same select -> empty-cell click flow with Pointer Events.
+  let pointerDrag = null;
+
+  document.addEventListener("pointerdown", event => {
+    if (event.pointerType === "mouse") return;
+    const source = event.target.closest(selectors.draggable);
+    if (!source) return;
+
+    pointerDrag = {
+      id: event.pointerId,
+      source,
+      startX: event.clientX,
+      startY: event.clientY,
+      active: false,
+      target: null
+    };
+  }, { passive: true });
+
+  document.addEventListener("pointermove", event => {
+    if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
+
+    const dx = event.clientX - pointerDrag.startX;
+    const dy = event.clientY - pointerDrag.startY;
+    if (!pointerDrag.active && Math.hypot(dx, dy) < 9) return;
+
+    if (!pointerDrag.active) {
+      pointerDrag.active = true;
+      pointerDrag.source.classList.add("dragging");
+      pointerDrag.source.click();
+    }
+
+    event.preventDefault();
+    clearDropTargets();
+
+    const underPointer = document.elementFromPoint(event.clientX, event.clientY);
+    const target = underPointer?.closest?.(`${selectors.bagDrop}, ${selectors.stagingDrop}`) || null;
+    pointerDrag.target = target;
+    if (target) target.classList.add("drop-target");
+  }, { passive: false });
+
+  function finishPointerDrag(event) {
+    if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
+    const drag = pointerDrag;
+    pointerDrag = null;
+
+    if (drag.active) {
+      event.preventDefault();
+      drag.source.classList.remove("dragging");
+      clearDropTargets();
+      if (drag.target?.isConnected) drag.target.click();
+    }
+  }
+
+  document.addEventListener("pointerup", finishPointerDrag, { passive: false });
+  document.addEventListener("pointercancel", event => {
+    if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
+    pointerDrag.source.classList.remove("dragging");
+    pointerDrag = null;
+    clearDropTargets();
+  });
+
   // app.js rebuilds bag/staging DOM frequently, so keep draggable attributes current.
   const observer = new MutationObserver(records => {
     for (const record of records) {
