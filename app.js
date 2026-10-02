@@ -32,7 +32,7 @@
   function init() {
     [
       "turnLabel", "playerHpBar", "playerHpLabel", "coinLabel", "stageMap", "combatScene", "sceneFxLayer",
-      "sceneEnemyName", "enemySprite", "enemyTrait", "bagGrid", "reactionLinks", "selectionText",
+      "sceneActMark", "sceneEnemyName", "enemySprite", "enemyTrait", "bagGrid", "reactionLinks", "selectionText",
       "itemDetailName", "itemDetailGlyph", "itemDetailStats", "itemDetailClose",
       "rotateButton", "storageButton", "sellButton", "stagingArea", "stagingCount", "reactionList", "shopGrid",
       "rerollButton", "enemyPreview", "battleButton", "recipeBook", "recipeProgress",
@@ -92,9 +92,6 @@
     el.battleModal.classList.remove("open");
     el.battleModal.setAttribute("aria-hidden", "true");
     renderAll();
-    requestAnimationFrame(() => {
-      el.combatScene?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
     showToast("古刀を一本持って探索を始めます。");
   }
 
@@ -1036,7 +1033,8 @@
   function renderBattlePreview() {
     const enemy = ENEMIES[Math.min(state.turn - 1, ENEMIES.length - 1)];
     const battleType = enemy.boss ? "BOSS" : "ENCOUNTER";
-    el.enemyPreview.textContent = `第${enemy.act || 1}幕 / ${battleType}　${enemy.name}　HP ${enemy.hp}`;
+    el.enemyPreview.textContent = `${battleType}　${enemy.name}　HP ${enemy.hp}`;
+    if (el.sceneActMark) el.sceneActMark.textContent = `第${enemy.act || 1}幕`;
     if (el.combatScene) {
       el.combatScene.dataset.act = String(enemy.act || 1);
       el.combatScene.classList.toggle("boss-scene", Boolean(enemy.boss));
@@ -1239,9 +1237,6 @@
     el.battleCloseButton.textContent = "次へ";
     el.battleModal.classList.add("open");
     el.battleModal.setAttribute("aria-hidden", "false");
-    requestAnimationFrame(() => {
-      el.battleModal.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
     logBattle(`${enemyDef.name}が現れた。`);
     if (enemyDef.boss) showSceneBanner(enemyDef.finalBoss ? "FINAL BOSS" : "BOSS", "boss");
 
@@ -1348,13 +1343,25 @@
   }
 
   function flashBattleItem(itemId) {
-    if (!el.battleBag) return;
-    const nodes = el.battleBag.querySelectorAll(`[data-item-id="${itemId}"]`);
-    nodes.forEach(node => {
+    const battleNodes = el.battleBag
+      ? [...el.battleBag.querySelectorAll(`[data-item-id="${itemId}"]`)]
+      : [];
+    const liveBagNodes = el.bagGrid
+      ? [...el.bagGrid.querySelectorAll(`[data-item-id="${itemId}"]`)]
+      : [];
+
+    battleNodes.forEach(node => {
       node.classList.remove("active");
       void node.offsetWidth;
       node.classList.add("active");
       setTimeout(() => node.classList.remove("active"), 420);
+    });
+
+    liveBagNodes.forEach(node => {
+      node.classList.remove("battle-active");
+      void node.offsetWidth;
+      node.classList.add("battle-active");
+      setTimeout(() => node.classList.remove("battle-active"), 420);
     });
   }
 
