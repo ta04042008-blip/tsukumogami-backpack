@@ -5,7 +5,7 @@
   // which works well on phones; this adds drag & drop without coupling to app.js internals.
   const selectors = {
     draggable: ".bag-cell.occupied, .staging-slot.filled",
-    bagDrop: ".bag-cell.empty",
+    bagDrop: ".bag-cell",
     stagingDrop: ".staging-slot:not(.filled)"
   };
 
