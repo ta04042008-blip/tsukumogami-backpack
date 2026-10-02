@@ -32,7 +32,7 @@
   function init() {
     [
       "turnLabel", "playerHpBar", "playerHpLabel", "coinLabel", "stageMap", "combatScene", "sceneFxLayer",
-      "sceneEnemyName", "enemySprite", "enemyTrait", "bagGrid", "selectionText",
+      "sceneEnemyName", "enemySprite", "enemyTrait", "bagGrid", "reactionLinks", "selectionText",
       "itemDetailName", "itemDetailGlyph", "itemDetailStats",
       "rotateButton", "storageButton", "sellButton", "stagingArea", "stagingCount", "reactionList", "shopGrid",
       "rerollButton", "enemyPreview", "battleButton", "recipeBook", "recipeProgress",
@@ -349,11 +349,13 @@
         } else {
           const def = defOf(item);
           cell.classList.add("occupied", def.category);
+          cell.dataset.itemId = item.id;
           if (item.id === state.selectedId) cell.classList.add("selected");
           if (reactingIds.has(item.id)) cell.classList.add("reacting");
 
           const isAnchor = item.x === x && item.y === y;
           if (isAnchor) {
+            cell.dataset.anchor = "1";
             const label = document.createElement("span");
             label.className = "cell-label";
 
@@ -404,7 +406,55 @@
         el.bagGrid.appendChild(cell);
       }
     }
+
+    requestAnimationFrame(() => renderReactionLinks(reactions));
   }
+
+  function itemVisualCenter(itemId) {
+    const cells = [...el.bagGrid.querySelectorAll(`.bag-cell[data-item-id="${itemId}"]`)];
+    if (!cells.length) return null;
+
+    const rects = cells.map(node => node.getBoundingClientRect());
+    const left = Math.min(...rects.map(r => r.left));
+    const right = Math.max(...rects.map(r => r.right));
+    const top = Math.min(...rects.map(r => r.top));
+    const bottom = Math.max(...rects.map(r => r.bottom));
+    return { x: (left + right) / 2, y: (top + bottom) / 2 };
+  }
+
+  function renderReactionLinks(reactions) {
+    if (!el.reactionLinks || !el.bagGrid?.isConnected) return;
+    el.reactionLinks.innerHTML = "";
+
+    const overlayRect = el.reactionLinks.getBoundingClientRect();
+    if (!overlayRect.width || !overlayRect.height) return;
+
+    for (const reaction of reactions) {
+      const a = itemVisualCenter(reaction.aId);
+      const b = itemVisualCenter(reaction.bId);
+      if (!a || !b) continue;
+
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", String(a.x - overlayRect.left));
+      line.setAttribute("y1", String(a.y - overlayRect.top));
+      line.setAttribute("x2", String(b.x - overlayRect.left));
+      line.setAttribute("y2", String(b.y - overlayRect.top));
+      line.setAttribute("class", "reaction-link-line");
+      el.reactionLinks.appendChild(line);
+
+      const seal = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      seal.setAttribute("cx", String((a.x + b.x) / 2 - overlayRect.left));
+      seal.setAttribute("cy", String((a.y + b.y) / 2 - overlayRect.top));
+      seal.setAttribute("r", "4");
+      seal.setAttribute("class", "reaction-link-seal");
+      el.reactionLinks.appendChild(seal);
+    }
+  }
+
+  window.addEventListener("resize", () => {
+    if (!state) return;
+    requestAnimationFrame(() => renderReactionLinks(computeReactions()));
+  });
 
   function handleBagCell(x, y, occupiedId) {
     if (state.inBattle || state.runOver) return;
