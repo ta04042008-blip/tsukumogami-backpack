@@ -206,6 +206,15 @@
 
   function computeReactions() {
     const candidates = allReactionCandidates();
+
+    const validPreferences = {};
+    for (const candidate of candidates) {
+      if (!isPreferredReaction(candidate)) continue;
+      validPreferences[candidate.aId] = candidate.bId;
+      validPreferences[candidate.bId] = candidate.aId;
+    }
+    state.reactionPreference = validPreferences;
+
     candidates.sort((x, y) => {
       const preferredDiff = Number(isPreferredReaction(y)) - Number(isPreferredReaction(x));
       return preferredDiff || x.priority - y.priority;
@@ -260,6 +269,7 @@
   function renderBag() {
     const reactions = computeReactions();
     const reactingIds = new Set(reactions.flatMap(r => [r.aId, r.bId]));
+    const selectedForPlacement = itemById(state.selectedId);
     el.bagGrid.innerHTML = "";
 
     for (let y = 0; y < ROWS; y++) {
@@ -271,6 +281,13 @@
         const item = itemAt(x, y);
         if (!item) {
           cell.classList.add("empty");
+          if (selectedForPlacement && !state.inBattle && !state.runOver) {
+            cell.classList.add(
+              canPlace(selectedForPlacement, x, y, selectedForPlacement.rot, selectedForPlacement.id)
+                ? "place-valid"
+                : "place-invalid"
+            );
+          }
           cell.setAttribute("aria-label", `空きマス ${x + 1},${y + 1}`);
           cell.addEventListener("click", () => handleBagCell(x, y, null));
         } else {
@@ -829,6 +846,13 @@
   function startBattle() {
     if (state.inBattle || state.runOver) return;
 
+    const reactionSnapshot = computeReactions().map(reaction => ({
+      aId: reaction.aId,
+      bId: reaction.bId,
+      recipe: reaction.recipe,
+      priority: reaction.priority
+    }));
+
     state.inBattle = true;
     state.selectedId = null;
     renderAll();
@@ -843,6 +867,7 @@
       enemyLast: 0,
       heavyLast: 0,
       itemLast: new Map(),
+      reactions: reactionSnapshot,
       finished: false
     };
 
@@ -1085,7 +1110,7 @@
       state.coins += reward;
       state.hp = Math.min(MAX_HP, state.hp + 20);
 
-      const reactions = computeReactions();
+      const reactions = battle.reactions || [];
       const awakenings = advanceUsageYears(reactions);
       lastNewRecipes = [];
       const changes = applyTransformations(reactions);
