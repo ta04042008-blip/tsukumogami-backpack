@@ -1,5 +1,7 @@
 # 付喪神バックパック（仮）
 
+![Validate Prototype](https://github.com/ta04042008-blip/tsukumogami-backpack/actions/workflows/validate.yml/badge.svg)
+
 和風モダン × 付喪神 × カバン整理ローグライトのプロトタイプです。
 
 ショップで古道具を集め、6×5のカバンに配置して戦います。  
@@ -46,6 +48,15 @@
 - 古道具が付喪神になっていくテーマとの一体感
 
 詳しい仕様は [GAME_DESIGN.md](./GAME_DESIGN.md) を参照してください。
+
+## GitHub Pages
+
+ブラウザから直接遊べるようにする場合は、GitHubリポジトリの **Settings → Pages** を開き、
+**Build and deployment → Deploy from a branch → main / (root)** を選んで保存してください。
+
+有効化後は通常、以下のURLで公開されます。
+
+`https://ta04042008-blip.github.io/tsukumogami-backpack/`
 
 ## 開発状況
 
