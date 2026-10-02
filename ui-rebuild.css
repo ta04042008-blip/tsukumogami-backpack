@@ -877,3 +877,63 @@ body.battle-mode .codex-drawer{
     height:112px;
   }
 }
+
+
+/* Act palettes and combat feedback */
+.combat-scene[data-act="1"]{
+  background:
+    linear-gradient(180deg,#355c7d 0 54%,#2a2947 54% 72%,#161421 72% 100%);
+}
+.combat-scene[data-act="2"]{
+  background:
+    linear-gradient(180deg,#40566f 0 45%,#3d3556 45% 70%,#1d1827 70% 100%);
+}
+.combat-scene[data-act="3"]{
+  background:
+    linear-gradient(180deg,#4d3546 0 44%,#3a2532 44% 70%,#171016 70% 100%);
+}
+.combat-scene.boss-scene{
+  box-shadow:
+    4px 4px 0 #080608,
+    inset 0 0 0 3px #9b6045,
+    inset 0 0 30px rgba(193,76,51,.18);
+}
+.boss-sprite span{
+  background:#7a382f;
+  box-shadow:
+    -11px -9px 0 #b84e3f,
+    12px 7px 0 #422226,
+    -7px 15px 0 #592a28;
+}
+.combat-scene.enemy-hit .enemy-fighter{
+  animation:enemy-hit-pixel .34s steps(3,end);
+}
+.combat-scene.player-hit .player-fighter{
+  animation:player-hit-pixel .34s steps(3,end);
+}
+.combat-scene.player-heal .player-fighter{
+  animation:heal-pixel .38s steps(3,end);
+}
+.combat-scene.player-shield .player-fighter{
+  animation:shield-pixel .38s steps(3,end);
+}
+@keyframes enemy-hit-pixel{
+  0%{transform:translateX(0);filter:brightness(1)}
+  30%{transform:translateX(7px);filter:brightness(2)}
+  60%{transform:translateX(-4px);filter:brightness(.65)}
+  100%{transform:translateX(0);filter:brightness(1)}
+}
+@keyframes player-hit-pixel{
+  0%{transform:translateX(0);filter:brightness(1)}
+  30%{transform:translateX(-7px);filter:brightness(1.9)}
+  60%{transform:translateX(4px);filter:brightness(.7)}
+  100%{transform:translateX(0);filter:brightness(1)}
+}
+@keyframes heal-pixel{
+  0%,100%{filter:brightness(1)}
+  50%{filter:brightness(1.8) drop-shadow(0 0 7px #8fcd7a)}
+}
+@keyframes shield-pixel{
+  0%,100%{filter:none}
+  50%{filter:brightness(1.4) drop-shadow(0 0 8px #79b9dc)}
+}
