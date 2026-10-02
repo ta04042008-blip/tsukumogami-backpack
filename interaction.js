@@ -223,14 +223,20 @@
     }
 
     event.preventDefault();
+    suppressClickUntil = performance.now() + 500;
+    pointerDrag = null;
+
+    drag.source?.classList.remove("dragging");
+    removeTouchGhost(drag.ghost);
+    document.body.classList.remove("touch-drag-active");
+    clearDropTargets();
+
     const target = targetInfoFromNode(drag.target);
     if (drag.target?.isConnected && target && dropValidity(drag.itemId, drag.target)) {
       interactionApi()?.drop(drag.itemId, target);
     } else {
       interactionApi()?.cancelDragSelection();
     }
-
-    cleanupPointerDrag({ suppressClick: true });
   }
 
   document.addEventListener("pointerup", finishPointerDrag, { passive: false });
