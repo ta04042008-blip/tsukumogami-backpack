@@ -2425,3 +2425,25 @@ body.battle-mode .game-screen-v3 .reaction-links{
     height:220px;
   }
 }
+
+
+.game-screen-v3 .arena-hud-actions{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  pointer-events:auto;
+}
+
+.game-screen-v3 .arena-reset{
+  width:32px;
+  height:32px;
+  min-width:32px;
+  padding:0;
+  border:2px solid #6d5947;
+  border-radius:0;
+  background:rgba(19,13,19,.9);
+  color:#d8c99f;
+  font-size:.86rem;
+  font-weight:900;
+  box-shadow:2px 2px 0 #080608;
+}
