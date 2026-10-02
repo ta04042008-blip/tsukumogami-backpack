@@ -27,3 +27,45 @@
     touch-action:none;
   }
 }
+
+
+.touch-drag-ghost{
+  position:fixed;
+  z-index:10000;
+  width:52px;
+  min-height:52px;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:4px;
+  border:3px solid #d0a45f;
+  background:#211922;
+  box-shadow:4px 4px 0 rgba(0,0,0,.55);
+  opacity:.92;
+  image-rendering:pixelated;
+}
+.touch-drag-ghost .cell-sub,
+.touch-drag-ghost .direction-arrow{
+  display:none;
+}
+.touch-drag-ghost .cell-label{
+  gap:1px;
+}
+.touch-drag-ghost.can-drop{
+  border-color:#8bc07b;
+  box-shadow:4px 4px 0 rgba(0,0,0,.55),0 0 0 2px rgba(139,192,123,.25);
+}
+.touch-drag-ghost.cannot-drop{
+  border-color:#a55b60;
+  opacity:.62;
+}
+body.touch-drag-active{
+  overscroll-behavior:none;
+}
+body.touch-drag-active .ui-v2{
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
