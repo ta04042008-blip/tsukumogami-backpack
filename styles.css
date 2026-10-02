@@ -56,7 +56,7 @@ button:not(:disabled){cursor:pointer}
 .section-heading.compact{align-items:flex-end}
 .section-heading h2{font-size:1.15rem}
 .helper-text{margin:0 0 10px;color:var(--muted);font-size:.82rem}
-.selection-actions{display:flex;gap:8px}
+.selection-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 button{
   border:1px solid #494f52;
   border-radius:10px;
