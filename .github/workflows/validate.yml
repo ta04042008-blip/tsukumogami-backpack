@@ -33,6 +33,8 @@ jobs:
           test -f pixel-theme.css
           test -f ui-rebuild.css
           test -f assets/tsukumoshi_idle_right_64x64.png
+          test -f assets/characters/tsukumoshi_idle_right_64x64.png
+          test -f assets/enemies/kogoni_idle_left_64x64.png
           test -f app.js
           test -f game-data.js
           test -f interaction.js
@@ -48,6 +50,7 @@ jobs:
           grep -q 'stageMap' index.html
           grep -q 'itemDetailStats' index.html
           grep -q 'tsukumoshi_idle_right_64x64.png' index.html
+          grep -q 'kogoni_idle_left_64x64.png' index.html
           grep -q 'ui-rebuild.css' index.html
 
       - name: Smoke-test static serving
