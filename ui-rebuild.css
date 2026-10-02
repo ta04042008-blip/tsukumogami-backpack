@@ -1115,3 +1115,75 @@ body.battle-mode .codex-drawer{
     font-size:.72rem;
   }
 }
+
+
+/* Official first-enemy sprite: Kogoni.
+   Same 0.4s fixed-foot idle rule as the protagonist. */
+.pixel-fighter{
+  align-items:flex-end;
+  justify-content:center;
+}
+.enemy-sprite-stack{
+  position:relative;
+  width:64px;
+  height:64px;
+  flex:0 0 64px;
+  overflow:visible;
+}
+.enemy-upper-window,
+.enemy-feet-window{
+  position:absolute;
+  left:0;
+  width:64px;
+  overflow:hidden;
+  pointer-events:none;
+}
+.enemy-upper-window{
+  top:0;
+  height:57px;
+}
+.enemy-feet-window{
+  top:56px;
+  height:8px;
+}
+.enemy-upper-window img,
+.enemy-feet-window img{
+  position:absolute;
+  left:0;
+  display:block;
+  width:64px;
+  height:64px;
+  max-width:none;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+  pointer-events:none;
+}
+.enemy-upper{
+  top:0;
+  animation:kogoni-idle-upper-shift .8s steps(1,end) infinite;
+}
+.enemy-feet{
+  top:-56px;
+}
+@keyframes kogoni-idle-upper-shift{
+  0%,49.999%{transform:translateY(0)}
+  50%,100%{transform:translateY(-1px)}
+}
+.enemy-fallback{
+  display:flex;
+}
+.enemy-sprite.official-kogoni .enemy-fallback{
+  display:none;
+}
+.enemy-sprite:not(.official-kogoni) .enemy-sprite-stack{
+  display:none;
+}
+@media (prefers-reduced-motion:reduce){
+  .enemy-upper{animation:none}
+}
+@media(max-width:520px){
+  .pixel-fighter{
+    width:64px;
+    height:64px;
+  }
+}
