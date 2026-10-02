@@ -154,8 +154,8 @@
     removeTouchGhost(drag.ghost);
     document.body.classList.remove("touch-drag-active");
     clearDropTargets();
-    interactionApi()?.cancelDragSelection();
 
+    if (drag.active) interactionApi()?.cancelDragSelection();
     if (suppressClick) suppressClickUntil = performance.now() + 500;
   }
 
