@@ -874,7 +874,9 @@
     }
     if (el.sceneEnemyName) el.sceneEnemyName.textContent = enemy.name;
     if (el.enemySprite) {
-      const span = el.enemySprite.querySelector("span");
+      const hasOfficialSprite = enemy.name === "小鬼";
+      el.enemySprite.classList.toggle("official-kogoni", hasOfficialSprite);
+      const span = el.enemySprite.querySelector(".enemy-fallback");
       if (span) span.textContent = enemy.name.slice(0, 1);
       el.enemySprite.classList.toggle("boss-sprite", Boolean(enemy.boss));
     }
