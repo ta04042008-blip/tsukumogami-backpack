@@ -1,0 +1,293 @@
+/* 16-bit inspired presentation layer */
+:root{
+  --pixel-bg:#171417;
+  --pixel-panel:#262027;
+  --pixel-panel-2:#332a31;
+  --pixel-ink:#fff1c7;
+  --pixel-gold:#e8b85d;
+  --pixel-red:#c95d47;
+  --pixel-blue:#6b8ca8;
+  --pixel-green:#799a6f;
+  --pixel-shadow:#0b090b;
+  --pixel-line:#6b5a52;
+}
+
+html{
+  image-rendering:pixelated;
+}
+
+body{
+  font-family:"MS Gothic","Osaka-Mono","Courier New",monospace;
+  letter-spacing:.01em;
+  background:
+    linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),
+    #151216;
+  background-size:8px 8px;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:999;
+  opacity:.14;
+  background:repeating-linear-gradient(
+    180deg,
+    transparent 0,
+    transparent 3px,
+    rgba(0,0,0,.2) 4px
+  );
+}
+
+.card,
+.battle-panel,
+.battle-launch{
+  border-radius:0;
+  border:3px solid var(--pixel-line);
+  box-shadow:
+    4px 4px 0 var(--pixel-shadow),
+    inset 2px 2px 0 rgba(255,255,255,.08),
+    inset -2px -2px 0 rgba(0,0,0,.28);
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.025) 25%,transparent 25%) 0 0/8px 8px,
+    var(--pixel-panel);
+}
+
+.topbar h1,
+.section-heading h2,
+.battle-top h2,
+.battle-result h3,
+.battle-launch strong{
+  text-shadow:2px 2px 0 #000;
+  letter-spacing:.04em;
+}
+
+.eyebrow{
+  color:var(--pixel-gold);
+  text-shadow:1px 1px 0 #000;
+}
+
+button{
+  border-radius:0;
+  border:3px solid #75645a;
+  background:#3b3137;
+  box-shadow:
+    3px 3px 0 #0d0a0d,
+    inset 1px 1px 0 rgba(255,255,255,.13);
+  text-shadow:1px 1px 0 #000;
+  transition:none;
+}
+
+button:hover:not(:disabled){
+  transform:none;
+  filter:brightness(1.12);
+}
+
+button:active:not(:disabled){
+  transform:translate(2px,2px);
+  box-shadow:1px 1px 0 #0d0a0d;
+}
+
+.primary-button{
+  background:#a84738;
+  border-color:#e08561;
+}
+
+.ghost-button{
+  background:#241e23;
+}
+
+.meter{
+  height:14px;
+  border-radius:0;
+  border:2px solid #100d10;
+  box-shadow:inset 0 0 0 1px #675650;
+  background:#161216;
+}
+
+.meter-fill{
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #6f9a70 0,
+      #6f9a70 10px,
+      #89b07f 10px,
+      #89b07f 16px
+    );
+}
+
+.enemy-fill{
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #a63f3f 0,
+      #a63f3f 10px,
+      #cf5f4b 10px,
+      #cf5f4b 16px
+    );
+}
+
+.bag-grid{
+  gap:2px;
+  padding:5px;
+  border:3px solid #594a43;
+  background:#0f0d10;
+  box-shadow:inset 0 0 0 2px #2d262a;
+}
+
+.bag-cell{
+  border-radius:0;
+  border:2px solid #41373a;
+  background:#181419;
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.04);
+}
+
+.bag-cell.occupied{
+  border-style:solid;
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.08),
+    inset -2px -2px 0 rgba(0,0,0,.28);
+}
+
+.bag-cell.weapon{background:#56352f}
+.bag-cell.support{background:#33443a}
+.bag-cell.defense{background:#354653}
+.bag-cell.heal{background:#415238}
+.bag-cell.fire{background:#6a3d2a}
+
+.bag-cell.selected{
+  outline:3px solid #ffe08a;
+  outline-offset:-3px;
+  animation:pixel-blink .8s steps(2,end) infinite;
+}
+
+.bag-cell.reacting{
+  box-shadow:inset 0 0 0 3px #e9a84f;
+}
+
+.bag-cell.place-valid{
+  border-color:#83b276;
+  background:#223025;
+}
+
+.bag-cell.place-invalid{
+  border-color:#633f46;
+  background:#21181b;
+}
+
+.cell-label,
+.shop-item h3,
+.staging-slot strong,
+.reaction-item strong{
+  text-shadow:1px 1px 0 #000;
+}
+
+.direction-arrow{
+  color:#ffe18f;
+  font-weight:900;
+  text-shadow:1px 1px 0 #000;
+}
+
+.staging-slot,
+.shop-item,
+.reaction-item,
+.recipe-entry,
+.discovery-notice,
+.toast,
+.pill,
+.battle-log,
+.battle-loadout{
+  border-radius:0;
+}
+
+.staging-slot,
+.shop-item,
+.recipe-entry,
+.reaction-item{
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.05);
+}
+
+.shop-item{
+  background:#211c21;
+  border-width:2px;
+}
+
+.rarity-badge{
+  border-radius:0;
+  min-width:30px;
+  height:24px;
+  box-shadow:2px 2px 0 #0d0a0d;
+}
+
+.rarity-common.rarity-badge{background:#3a3836}
+.rarity-uncommon.rarity-badge{background:#31503a}
+.rarity-rare.rarity-badge{background:#513663}
+
+.battle-panel{
+  background:#1b171c;
+}
+
+.battle-center{
+  font-size:1.25rem;
+  text-shadow:2px 2px 0 #000;
+}
+
+.battle-bag{
+  gap:2px;
+  border:2px solid #4e4146;
+  padding:4px;
+  background:#0d0b0d;
+}
+
+.battle-bag-cell{
+  border-radius:0;
+  border:2px solid #332c30;
+}
+
+.battle-bag-cell.active{
+  transform:none;
+  filter:brightness(1.5);
+  box-shadow:
+    inset 0 0 0 2px #fff1a2,
+    0 0 0 2px #d27a47;
+  animation:pixel-flash .38s steps(2,end);
+}
+
+.battle-log{
+  border:2px solid #4a3d42;
+  background:#0b090b;
+}
+
+.discovery-notice{
+  border:3px solid #9d713d;
+  background:#302318;
+  box-shadow:3px 3px 0 #0c0907;
+}
+
+.toast{
+  border:3px solid #6e5a4d;
+  box-shadow:4px 4px 0 #0b090b;
+}
+
+@keyframes pixel-blink{
+  0%,49%{filter:brightness(1)}
+  50%,100%{filter:brightness(1.35)}
+}
+
+@keyframes pixel-flash{
+  0%,49%{filter:brightness(1.9)}
+  50%,100%{filter:brightness(1.1)}
+}
+
+@media(max-width:560px){
+  .app-shell{padding:8px 7px 34px}
+  .card,
+  .battle-panel,
+  .battle-launch{border-width:2px}
+  .topbar h1{font-size:1.15rem}
+  .eyebrow{font-size:.6rem}
+  button{border-width:2px;padding:8px 9px}
+  .battle-loadout-head small{display:none}
+}
