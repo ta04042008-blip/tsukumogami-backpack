@@ -1026,3 +1026,92 @@ body.battle-mode .codex-drawer{
 @media (prefers-reduced-motion:reduce){
   .hero-upper{animation:none}
 }
+
+
+/* First-battle polish: readable combat feedback without relying on the text log. */
+.scene-fx-layer{
+  position:absolute;
+  inset:0;
+  z-index:6;
+  pointer-events:none;
+  overflow:hidden;
+}
+.scene-float{
+  position:absolute;
+  top:48%;
+  min-width:42px;
+  text-align:center;
+  font-size:.86rem;
+  font-weight:900;
+  letter-spacing:.02em;
+  text-shadow:2px 2px 0 #090609;
+  animation:scene-float-up .7s steps(5,end) forwards;
+}
+.scene-float.player{left:22%}
+.scene-float.enemy{right:20%}
+.scene-float.damage{color:#ffbc83}
+.scene-float.heal{color:#9cdb8e}
+.scene-float.shield{color:#8fd1ec}
+.scene-float.retaliation{color:#f5d276}
+@keyframes scene-float-up{
+  0%{opacity:0;transform:translateY(7px) scale(.9)}
+  15%{opacity:1;transform:translateY(0) scale(1.05)}
+  70%{opacity:1;transform:translateY(-13px) scale(1)}
+  100%{opacity:0;transform:translateY(-21px) scale(1)}
+}
+.scene-banner{
+  position:absolute;
+  left:50%;
+  top:52%;
+  transform:translate(-50%,-50%);
+  padding:5px 12px;
+  border:3px solid #6d5748;
+  background:#171119;
+  color:#ffe3a0;
+  font-size:1rem;
+  letter-spacing:.1em;
+  text-shadow:2px 2px 0 #000;
+  box-shadow:4px 4px 0 rgba(0,0,0,.55);
+  animation:scene-banner-pop .9s steps(4,end) forwards;
+}
+.scene-banner.boss{
+  color:#ffb07a;
+  border-color:#9e5947;
+  background:#2c1518;
+}
+.scene-banner.win{
+  color:#ffe59c;
+  border-color:#a47a43;
+}
+.scene-banner.lose{
+  color:#ef9898;
+  border-color:#86444a;
+}
+@keyframes scene-banner-pop{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.75)}
+  18%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+  55%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1)}
+}
+
+/* Keep the battle scene visually compact on phones; the scene header already names both sides. */
+@media(max-width:520px){
+  .combat-scene{
+    min-height:148px;
+  }
+  .fighters{
+    min-height:82px;
+    padding-top:0;
+  }
+  .fighter-name,
+  .fighter-caption{
+    display:none;
+  }
+  .versus-mark{
+    margin-bottom:18px;
+  }
+  .scene-float{
+    top:54%;
+    font-size:.72rem;
+  }
+}
