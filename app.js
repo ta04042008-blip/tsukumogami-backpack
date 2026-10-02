@@ -1625,6 +1625,7 @@
       state.selectedId = null;
       state.previewType = null;
       document.body.classList.remove("has-item-detail");
+      renderAll();
     }
   };
 })();
