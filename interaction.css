@@ -19,3 +19,11 @@
     cursor:pointer;
   }
 }
+
+
+@media (pointer:coarse){
+  .bag-cell.occupied,
+  .staging-slot.filled{
+    touch-action:none;
+  }
+}
