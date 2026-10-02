@@ -335,6 +335,7 @@
       inBattle: false,
       runOver: false,
       shop: ["hammer", "mirror", "flint", "oil"],
+      reactionPreference: {},
       discovered: loadDiscovered(),
       tsukumogamiDiscovered: loadTsukumogamiDiscovered()
     };
@@ -439,7 +440,11 @@
     ) || null;
   }
 
-  function computeReactions() {
+  function reactionPairKey(aId, bId) {
+    return [aId, bId].sort().join("|");
+  }
+
+  function allReactionCandidates() {
     const candidates = [];
     const items = bagItems();
 
@@ -459,7 +464,20 @@
       }
     }
 
-    candidates.sort((x, y) => x.priority - y.priority);
+    return candidates;
+  }
+
+  function isPreferredReaction(candidate) {
+    return state.reactionPreference?.[candidate.aId] === candidate.bId &&
+      state.reactionPreference?.[candidate.bId] === candidate.aId;
+  }
+
+  function computeReactions() {
+    const candidates = allReactionCandidates();
+    candidates.sort((x, y) => {
+      const preferredDiff = Number(isPreferredReaction(y)) - Number(isPreferredReaction(x));
+      return preferredDiff || x.priority - y.priority;
+    });
 
     const used = new Set();
     const selected = [];
@@ -470,6 +488,22 @@
       selected.push(candidate);
     }
     return selected;
+  }
+
+  function chooseReaction(aId, bId) {
+    if (state.inBattle || state.runOver) return;
+
+    const preference = state.reactionPreference || (state.reactionPreference = {});
+    for (const [itemId, partnerId] of Object.entries(preference)) {
+      if (itemId === aId || itemId === bId || partnerId === aId || partnerId === bId) {
+        delete preference[itemId];
+      }
+    }
+
+    preference[aId] = bId;
+    preference[bId] = aId;
+    showToast("この組み合わせを次ターンの変化として予約しました。");
+    renderAll();
   }
 
   function renderAll() {
@@ -621,25 +655,57 @@
   }
 
   function renderReactions() {
-    const reactions = computeReactions();
+    const candidates = allReactionCandidates();
+    const selected = computeReactions();
+    const selectedKeys = new Set(selected.map(r => reactionPairKey(r.aId, r.bId)));
     el.reactionList.innerHTML = "";
 
-    if (!reactions.length) {
+    if (!candidates.length) {
       el.reactionList.innerHTML = '<p class="empty-note">対応する道具を上下左右に並べると、ここに変化予定が表示されます。</p>';
       return;
     }
 
-    reactions.forEach(reaction => {
-      const a = itemById(reaction.aId);
-      const b = itemById(reaction.bId);
-      if (!a || !b) return;
-
-      const known = state.discovered.has(recipeKey(reaction.recipe));
-      const div = document.createElement("div");
-      div.className = "reaction-item";
-      div.innerHTML = `${defOf(a).name} + ${defOf(b).name}<br>次ターン → <strong>${known ? ITEM_DEFS[reaction.recipe.result].name : "？？？"}</strong>`;
-      el.reactionList.appendChild(div);
+    const involvement = new Map();
+    candidates.forEach(candidate => {
+      involvement.set(candidate.aId, (involvement.get(candidate.aId) || 0) + 1);
+      involvement.set(candidate.bId, (involvement.get(candidate.bId) || 0) + 1);
     });
+
+    candidates
+      .sort((x, y) => Number(selectedKeys.has(reactionPairKey(y.aId, y.bId))) - Number(selectedKeys.has(reactionPairKey(x.aId, x.bId))) || x.priority - y.priority)
+      .forEach(reaction => {
+        const a = itemById(reaction.aId);
+        const b = itemById(reaction.bId);
+        if (!a || !b) return;
+
+        const pairKey = reactionPairKey(reaction.aId, reaction.bId);
+        const isSelected = selectedKeys.has(pairKey);
+        const hasConflict = (involvement.get(reaction.aId) || 0) > 1 || (involvement.get(reaction.bId) || 0) > 1;
+        const known = state.discovered.has(recipeKey(reaction.recipe));
+
+        const div = document.createElement("div");
+        div.className = `reaction-item${isSelected ? " reaction-selected" : " reaction-alternative"}`;
+
+        const text = document.createElement("div");
+        text.innerHTML = `${defOf(a).name} + ${defOf(b).name}<br>次ターン → <strong>${known ? ITEM_DEFS[reaction.recipe.result].name : "？？？"}</strong>`;
+        div.appendChild(text);
+
+        if (isSelected) {
+          const badge = document.createElement("span");
+          badge.className = "reaction-status";
+          badge.textContent = hasConflict ? "予約済み" : "自動予約";
+          div.appendChild(badge);
+        } else if (hasConflict) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "reaction-choice";
+          button.textContent = "この変化を予約";
+          button.addEventListener("click", () => chooseReaction(reaction.aId, reaction.bId));
+          div.appendChild(button);
+        }
+
+        el.reactionList.appendChild(div);
+      });
   }
 
   function canStoreIn(container, item) {
