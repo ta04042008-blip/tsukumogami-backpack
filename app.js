@@ -31,7 +31,9 @@
 
   function init() {
     [
-      "turnLabel", "playerHpBar", "playerHpLabel", "coinLabel", "bagGrid", "selectionText",
+      "turnLabel", "playerHpBar", "playerHpLabel", "coinLabel", "stageMap", "combatScene",
+      "sceneEnemyName", "enemySprite", "enemyTrait", "bagGrid", "selectionText",
+      "itemDetailName", "itemDetailGlyph", "itemDetailStats",
       "rotateButton", "storageButton", "sellButton", "stagingArea", "stagingCount", "reactionList", "shopGrid",
       "rerollButton", "enemyPreview", "battleButton", "recipeBook", "recipeProgress",
       "tsukumogamiBook", "tsukumogamiProgress", "resetButton",
@@ -68,6 +70,7 @@
       runOver: false,
       shop: ["hammer", "mirror", "flint", "oil"],
       rerollCount: 0,
+      previewType: null,
       reactionPreference: {},
       discovered: loadDiscovered(),
       tsukumogamiDiscovered: loadTsukumogamiDiscovered()
@@ -79,6 +82,7 @@
     starter.rot = 1;
     state.items.push(starter);
 
+    document.body.classList.remove("battle-mode");
     el.battleModal.classList.remove("open");
     el.battleModal.setAttribute("aria-hidden", "true");
     renderAll();
@@ -101,6 +105,18 @@
   function defOf(itemOrType) {
     const id = typeof itemOrType === "string" ? itemOrType : itemOrType.typeId;
     return ITEM_DEFS[id];
+  }
+
+  function itemGlyph(itemOrType) {
+    const def = defOf(itemOrType);
+    if (!def) return "?";
+    return def.name.replace(/^付喪神・/, "").replace(/^お/, "").slice(0, 1) || "?";
+  }
+
+  function shortItemName(itemOrType) {
+    const def = defOf(itemOrType);
+    if (!def) return "";
+    return def.name.replace(/^付喪神・/, "").slice(0, 5);
   }
 
   function dimensions(item, rot = item.rot) {
