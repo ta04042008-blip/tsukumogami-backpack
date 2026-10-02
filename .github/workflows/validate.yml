@@ -60,6 +60,13 @@ jobs:
           grep -q 'kogoni_idle_left_64x64.png' index.html
           grep -q 'ui-rebuild.css' index.html
 
+      - name: Check cache-bust version consistency
+        run: |
+          VERSION_COUNT=$(grep -o '?v=[A-Za-z0-9._-]*' index.html | wc -l)
+          UNIQUE_COUNT=$(grep -o '?v=[A-Za-z0-9._-]*' index.html | sort -u | wc -l)
+          test "$VERSION_COUNT" -eq 7
+          test "$UNIQUE_COUNT" -eq 1
+
       - name: Smoke-test static serving
         run: |
           python3 -m http.server 8000 >/tmp/tsukumogami-http.log 2>&1 &
