@@ -1225,9 +1225,12 @@ body.battle-mode .codex-drawer{
   position:relative;
   z-index:3;
 }
-.backpack-frame .bag-cell .cell-label,
-.backpack-frame .bag-cell .direction-arrow{
+.backpack-frame .bag-cell .cell-label{
   position:relative;
+  z-index:10;
+}
+.backpack-frame .bag-cell .direction-arrow{
+  position:absolute;
   z-index:10;
 }
 .detail-close{
@@ -1704,8 +1707,9 @@ body.battle-mode .codex-drawer{
   }
 
   .shop-sprite.has-item-icon{
-    width:34px;
-    height:34px;
+    box-sizing:border-box;
+    width:32px;
+    height:32px;
     padding:1px;
   }
 
@@ -1717,5 +1721,14 @@ body.battle-mode .codex-drawer{
   .battle-item-visual.has-item-icon{
     width:26px;
     height:26px;
+  }
+}
+
+
+/* Very short one-screen layouts need a little more breathing room around the icon. */
+@media(max-width:520px) and (min-height:680px) and (max-height:720px){
+  .item-glyph.has-item-icon{
+    width:30px;
+    height:30px;
   }
 }
