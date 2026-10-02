@@ -1,0 +1,21 @@
+.bag-cell.occupied[draggable="true"],
+.staging-slot.filled[draggable="true"]{
+  cursor:grab;
+}
+.bag-cell.occupied.dragging,
+.staging-slot.filled.dragging{
+  opacity:.48;
+  cursor:grabbing;
+}
+.bag-cell.drop-target,
+.staging-slot.drop-target{
+  outline:3px solid #e0b56b;
+  outline-offset:-3px;
+  background:#302a21;
+}
+@media (hover:none){
+  .bag-cell.occupied[draggable="true"],
+  .staging-slot.filled[draggable="true"]{
+    cursor:pointer;
+  }
+}
