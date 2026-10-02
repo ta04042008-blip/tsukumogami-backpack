@@ -991,6 +991,8 @@
 
     state.inBattle = true;
     state.selectedId = null;
+    state.previewType = null;
+    document.body.classList.add("battle-mode");
     renderAll();
 
     const enemyDef = ENEMIES[state.turn - 1];
@@ -1355,6 +1357,7 @@
   }
 
   function closeBattleModal() {
+    document.body.classList.remove("battle-mode");
     el.battleModal.classList.remove("open");
     el.battleModal.setAttribute("aria-hidden", "true");
     renderAll();
