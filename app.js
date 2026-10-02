@@ -310,6 +310,7 @@
   let state = null;
   let battle = null;
   let battleTicker = null;
+  let lastNewRecipes = [];
 
   const el = {};
 
@@ -323,7 +324,7 @@
       "tsukumogamiBook", "tsukumogamiProgress", "resetButton",
       "battleModal", "battleEnemyName", "battleTimer", "enemyHpLabel", "enemyHpBar",
       "battlePlayerHpLabel", "battlePlayerHpBar", "shieldLabel", "battleBag", "battleLog", "battleResult",
-      "battleResultTitle", "battleResultText", "battleCloseButton", "toast"
+      "battleResultTitle", "battleResultText", "discoveryNotice", "battleCloseButton", "toast"
     ].forEach(id => el[id] = document.getElementById(id));
 
     el.rotateButton.addEventListener("click", rotateSelected);
@@ -1101,6 +1102,8 @@
     el.battleEnemyName.textContent = enemyDef.name;
     renderBattleBag();
     el.battleLog.innerHTML = "";
+    el.discoveryNotice.classList.add("hidden");
+    el.discoveryNotice.innerHTML = "";
     el.battleResult.classList.add("hidden");
     el.battleCloseButton.textContent = "次へ";
     el.battleModal.classList.add("open");
@@ -1335,6 +1338,7 @@
 
       const reactions = computeReactions();
       const awakenings = advanceUsageYears(reactions);
+      lastNewRecipes = [];
       const changes = applyTransformations(reactions);
       const changeText = changes.length ? " 道具変化：" + changes.join("、") : "";
       const awakeningText = awakenings.length ? " 付喪神化：" + awakenings.join("、") : "";
@@ -1349,6 +1353,18 @@
       }
 
       el.battleResultTitle.textContent = state.runOver ? "踏破！" : "勝利";
+
+      const discoveryLines = [];
+      if (lastNewRecipes.length) {
+        discoveryLines.push(`<strong>新レシピ発見</strong><br>${lastNewRecipes.join("、")}`);
+      }
+      if (awakenings.length) {
+        discoveryLines.push(`<strong>付喪神化</strong><br>${awakenings.join("、")}`);
+      }
+      if (discoveryLines.length) {
+        el.discoveryNotice.innerHTML = discoveryLines.join("<hr>");
+        el.discoveryNotice.classList.remove("hidden");
+      }
     } else {
       state.runOver = true;
       el.battleResultTitle.textContent = "敗北";
@@ -1411,9 +1427,12 @@
       }
 
       state.items.push(result);
-      state.discovered.add(recipeKey(reaction.recipe));
+      const key = recipeKey(reaction.recipe);
+      const wasKnown = state.discovered.has(key);
+      state.discovered.add(key);
 
       const resultName = ITEM_DEFS[reaction.recipe.result].name;
+      if (!wasKnown) lastNewRecipes.push(resultName);
       changedNames.push(resultName);
     }
 
