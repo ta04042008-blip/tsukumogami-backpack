@@ -1,0 +1,42 @@
+name: Validate Prototype
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check JavaScript syntax
+        run: node --check app.js
+
+      - name: Check required static files
+        run: |
+          test -f index.html
+          test -f styles.css
+          test -f app.js
+          test -f GAME_DESIGN.md
+          grep -q 'styles.css' index.html
+          grep -q 'app.js' index.html
+
+      - name: Smoke-test static serving
+        run: |
+          python3 -m http.server 8000 >/tmp/tsukumogami-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID' EXIT
+          sleep 1
+          curl --fail --silent http://127.0.0.1:8000/index.html >/dev/null
+          curl --fail --silent http://127.0.0.1:8000/app.js >/dev/null
