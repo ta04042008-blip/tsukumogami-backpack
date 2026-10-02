@@ -261,7 +261,8 @@
   }
 
   function renderHud() {
-    el.turnLabel.textContent = `${Math.min(state.turn, 5)} / 5`;
+    const currentEnemy = ENEMIES[Math.min(state.turn - 1, ENEMIES.length - 1)];
+    el.turnLabel.textContent = `${Math.min(state.turn, ENEMIES.length)} / ${ENEMIES.length} ・ 第${currentEnemy.act || 1}幕`;
     el.playerHpLabel.textContent = `${Math.max(0, Math.round(state.hp))} / ${MAX_HP}`;
     el.playerHpBar.style.width = `${Math.max(0, Math.min(100, state.hp))}%`;
     el.coinLabel.textContent = `${state.coins}文`;
@@ -712,7 +713,8 @@
 
   function renderBattlePreview() {
     const enemy = ENEMIES[Math.min(state.turn - 1, ENEMIES.length - 1)];
-    el.enemyPreview.textContent = `${enemy.name}　HP ${enemy.hp}`;
+    const battleType = enemy.boss ? "BOSS" : "ENCOUNTER";
+    el.enemyPreview.textContent = `第${enemy.act || 1}幕 / ${battleType}　${enemy.name}　HP ${enemy.hp}`;
 
     if (state.runOver) {
       el.battleButton.disabled = true;
@@ -721,7 +723,7 @@
     }
 
     el.battleButton.disabled = state.inBattle;
-    el.battleButton.textContent = state.turn === 5 ? "ボス戦開始" : "戦闘開始";
+    el.battleButton.textContent = enemy.boss ? "ボス戦開始" : "戦闘開始";
   }
 
   function loadDiscovered() {
@@ -1135,7 +1137,7 @@
 
       if (state.turn >= ENEMIES.length) {
         state.runOver = true;
-        resultText = `赤鬼を倒し、全5戦を踏破しました。${changeText}${awakeningText}`;
+        resultText = `${battle.enemyDef.name}を倒し、全${ENEMIES.length}戦を踏破しました。${changeText}${awakeningText}`;
       } else {
         state.turn += 1;
         state.shop = randomShop();
