@@ -49,6 +49,8 @@ jobs:
           grep -q 'interaction.css' index.html
           grep -q 'stageMap' index.html
           grep -q 'itemDetailStats' index.html
+          grep -q 'reactionLinks' index.html
+          grep -q 'itemDetailClose' index.html
           grep -q 'tsukumoshi_idle_right_64x64.png' index.html
           grep -q 'kogoni_idle_left_64x64.png' index.html
           grep -q 'ui-rebuild.css' index.html
