@@ -31,6 +31,7 @@ jobs:
           test -f index.html
           test -f styles.css
           test -f pixel-theme.css
+          test -f ui-rebuild.css
           test -f app.js
           test -f game-data.js
           test -f interaction.js
@@ -38,6 +39,7 @@ jobs:
           test -f GAME_DESIGN.md
           grep -q 'styles.css' index.html
           grep -q 'pixel-theme.css' index.html
+          grep -q 'ui-rebuild.css' index.html
           grep -q 'game-data.js' index.html
           grep -q 'app.js' index.html
           grep -q 'interaction.js' index.html
@@ -51,5 +53,6 @@ jobs:
           sleep 1
           curl --fail --silent http://127.0.0.1:8000/index.html >/dev/null
           curl --fail --silent http://127.0.0.1:8000/pixel-theme.css >/dev/null
+          curl --fail --silent http://127.0.0.1:8000/ui-rebuild.css >/dev/null
           curl --fail --silent http://127.0.0.1:8000/game-data.js >/dev/null
           curl --fail --silent http://127.0.0.1:8000/app.js >/dev/null
