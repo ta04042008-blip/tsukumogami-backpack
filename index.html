@@ -3,75 +3,169 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#151718" />
-  <title>付喪神バックパック - Prototype</title>
+  <meta name="theme-color" content="#100d16" />
+  <title>付喪神バックパック - 16-BIT Prototype</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./pixel-theme.css" />
+  <link rel="stylesheet" href="./ui-rebuild.css" />
   <link rel="stylesheet" href="./interaction.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
+  <div class="app-shell ui-v2">
+    <header class="topbar game-titlebar">
       <div>
         <p class="eyebrow">TSUKUMOGAMI BACKPACK</p>
-        <h1>付喪神バックパック <span>16-BIT Prototype v0.1</span></h1>
+        <h1>付喪神バックパック <span>16-BIT Prototype v0.2</span></h1>
       </div>
-      <button id="resetButton" class="ghost-button" type="button">最初から</button>
+      <button id="resetButton" class="ghost-button compact-button" type="button">最初から</button>
     </header>
 
-    <section class="hud card" aria-label="ゲーム状況">
-      <div class="hud-item">
-        <span>戦</span>
-        <strong id="turnLabel">1 / 15 ・ 第1幕</strong>
+    <section class="stage-header card">
+      <div class="stage-title-row">
+        <div>
+          <p class="eyebrow">ROUTE</p>
+          <strong id="turnLabel">1 / 15 ・ 第1幕</strong>
+        </div>
+        <div class="currency-box">
+          <span>所持金</span>
+          <strong id="coinLabel">10文</strong>
+        </div>
       </div>
-      <div class="hud-item hp-item">
-        <span>体力</span>
-        <div class="meter"><div id="playerHpBar" class="meter-fill"></div></div>
-        <strong id="playerHpLabel">100 / 100</strong>
+      <div id="stageMap" class="stage-map" aria-label="全15戦の進行マップ"></div>
+    </section>
+
+    <section id="combatScene" class="combat-scene card" aria-label="次の戦闘">
+      <div class="scene-sky"></div>
+      <div class="scene-info">
+        <div>
+          <p class="eyebrow">NEXT BATTLE</p>
+          <strong id="enemyPreview">第1幕 / ENCOUNTER　小鬼　HP 65</strong>
+        </div>
+        <div class="scene-player-hp">
+          <span>体力</span>
+          <div class="meter"><div id="playerHpBar" class="meter-fill"></div></div>
+          <strong id="playerHpLabel">100 / 100</strong>
+        </div>
       </div>
-      <div class="hud-item">
-        <span>所持金</span>
-        <strong id="coinLabel">10文</strong>
+
+      <div class="fighters">
+        <div class="fighter player-fighter">
+          <div class="fighter-name">付喪師</div>
+          <div class="pixel-fighter hero-sprite" aria-hidden="true">
+            <span>付</span>
+          </div>
+          <div class="fighter-caption">古道具に魂を宿す者</div>
+        </div>
+        <div class="versus-mark">VS</div>
+        <div class="fighter enemy-fighter">
+          <div class="fighter-name" id="sceneEnemyName">小鬼</div>
+          <div id="enemySprite" class="pixel-fighter enemy-sprite" aria-hidden="true">
+            <span>鬼</span>
+          </div>
+          <div class="fighter-caption" id="enemyTrait">妖怪</div>
+        </div>
       </div>
     </section>
 
-    <main class="game-layout">
-      <section class="card board-card">
-        <div class="section-heading">
+    <div id="battleModal" class="modal inline-battle" aria-hidden="true">
+      <div class="battle-panel">
+        <div class="battle-top">
+          <div>
+            <p class="eyebrow">AUTO BATTLE</p>
+            <h2 id="battleEnemyName">小鬼</h2>
+          </div>
+          <span id="battleTimer">0.0s</span>
+        </div>
+
+        <div class="battle-hp-row">
+          <div class="combatant enemy">
+            <div class="combatant-row">
+              <span>敵</span>
+              <strong id="enemyHpLabel">65 / 65</strong>
+            </div>
+            <div class="meter large"><div id="enemyHpBar" class="meter-fill enemy-fill"></div></div>
+          </div>
+
+          <div class="battle-center">対</div>
+
+          <div class="combatant player">
+            <div class="combatant-row">
+              <span>付喪師</span>
+              <strong id="battlePlayerHpLabel">100 / 100</strong>
+            </div>
+            <div class="meter large"><div id="battlePlayerHpBar" class="meter-fill"></div></div>
+            <div class="shield-line">結界 <strong id="shieldLabel">0</strong></div>
+          </div>
+        </div>
+
+        <div class="battle-loadout">
+          <div class="battle-loadout-head">
+            <span>戦闘中のカバン</span>
+            <small>発動した道具が光ります</small>
+          </div>
+          <div id="battleBag" class="battle-bag" aria-label="戦闘中のカバン"></div>
+        </div>
+
+        <div id="battleLog" class="battle-log" aria-live="polite"></div>
+
+        <div id="battleResult" class="battle-result hidden">
+          <h3 id="battleResultTitle">勝利</h3>
+          <p id="battleResultText"></p>
+          <div id="discoveryNotice" class="discovery-notice hidden"></div>
+          <button id="battleCloseButton" class="primary-button" type="button">次へ</button>
+        </div>
+      </div>
+    </div>
+
+    <main class="prep-layout">
+      <section class="card board-card inventory-board">
+        <div class="inventory-topbar">
           <div>
             <p class="eyebrow">BACKPACK</p>
-            <h2>カバン</h2>
+            <h2>付喪師のカバン</h2>
           </div>
           <div class="selection-actions">
-            <button id="rotateButton" type="button" disabled>回転</button>
+            <button id="rotateButton" type="button" disabled>↻ 回転</button>
             <button id="storageButton" type="button" disabled>収納</button>
             <button id="sellButton" type="button" disabled>売却</button>
           </div>
         </div>
 
-        <p id="selectionText" class="helper-text">道具を選択し、空いているマスをタップして配置します。</p>
-        <div id="bagGrid" class="bag-grid" aria-label="6×5のカバン"></div>
+        <div class="staging-strip">
+          <div class="strip-label">
+            <span>入手品</span>
+            <strong id="stagingCount">0 / 6</strong>
+          </div>
+          <div id="stagingArea" class="staging-area"></div>
+        </div>
+
+        <div class="backpack-frame">
+          <div id="bagGrid" class="bag-grid" aria-label="6×5のカバン"></div>
+        </div>
 
         <div class="legend">
-          <span><i class="dot dot-selected"></i>選択中</span>
+          <span><i class="dot dot-selected"></i>選択</span>
           <span><i class="dot dot-reaction"></i>変化予定</span>
-          <span><i class="dot dot-direction"></i>向きあり</span>
+          <span><i class="dot dot-direction"></i>向き</span>
         </div>
       </section>
 
-      <aside class="side-column">
-        <section class="card staging-card">
-          <div class="section-heading compact">
+      <aside class="prep-sidebar">
+        <section id="itemDetailPanel" class="card item-detail-card">
+          <div class="detail-header">
             <div>
-              <p class="eyebrow">STAGING</p>
-              <h2>仮置き場</h2>
+              <p class="eyebrow">ITEM</p>
+              <h2 id="itemDetailName">道具を選択</h2>
             </div>
-            <span id="stagingCount" class="pill">0 / 6</span>
+            <div id="itemDetailGlyph" class="detail-glyph">?</div>
           </div>
-          <div id="stagingArea" class="staging-area"></div>
+          <p id="selectionText" class="helper-text">道具を選ぶと、ここに性能・変化・使用年月が表示されます。</p>
+          <div id="itemDetailStats" class="detail-stats">
+            <span class="detail-placeholder">カバンや入手品をタップしてください。</span>
+          </div>
         </section>
 
-        <section class="card reaction-card">
+        <section class="card reaction-card compact-panel">
           <div class="section-heading compact">
             <div>
               <p class="eyebrow">REACTION</p>
@@ -83,99 +177,54 @@
       </aside>
     </main>
 
-    <section class="card shop-card">
-      <div class="section-heading">
+    <section class="card shop-card shelf-card">
+      <div class="section-heading shop-heading">
         <div>
           <p class="eyebrow">SHOP</p>
           <h2>古道具屋</h2>
         </div>
         <button id="rerollButton" type="button">品揃え更新 1文</button>
       </div>
-      <div id="shopGrid" class="shop-grid"></div>
+      <div id="shopGrid" class="shop-grid shop-shelf"></div>
     </section>
 
-    <section class="battle-launch">
+    <section class="battle-launch start-panel">
       <div>
-        <p class="eyebrow">NEXT BATTLE</p>
-        <strong id="enemyPreview">小鬼　HP 65</strong>
-        <span id="battleHint">配置を整えたら戦闘を開始します。</span>
+        <p class="eyebrow">READY</p>
+        <strong>配置を整えて出陣</strong>
+        <span id="battleHint">道具の位置と変化予定を確認してください。</span>
       </div>
-      <button id="battleButton" class="primary-button" type="button">戦闘開始</button>
+      <button id="battleButton" class="primary-button start-button" type="button">戦闘開始</button>
     </section>
 
-    <section class="card recipe-card">
-      <div class="section-heading compact">
-        <div>
-          <p class="eyebrow">DISCOVERY</p>
-          <h2>変化図鑑</h2>
-        </div>
-        <span id="recipeProgress" class="pill">0 / 25</span>
-      </div>
-      <div id="recipeBook" class="recipe-book"></div>
-
-      <div class="tsukumogami-section">
+    <details class="codex-drawer card">
+      <summary>図鑑・発見記録</summary>
+      <section class="recipe-card codex-content">
         <div class="section-heading compact">
           <div>
-            <p class="eyebrow">AWAKENING</p>
-            <h2>付喪神図鑑</h2>
+            <p class="eyebrow">DISCOVERY</p>
+            <h2>変化図鑑</h2>
           </div>
-          <span id="tsukumogamiProgress" class="pill">0 / 6</span>
+          <span id="recipeProgress" class="pill">0 / 25</span>
         </div>
-        <div id="tsukumogamiBook" class="recipe-book"></div>
-      </div>
-    </section>
+        <div id="recipeBook" class="recipe-book"></div>
+
+        <div class="tsukumogami-section">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">AWAKENING</p>
+              <h2>付喪神図鑑</h2>
+            </div>
+            <span id="tsukumogamiProgress" class="pill">0 / 6</span>
+          </div>
+          <div id="tsukumogamiBook" class="recipe-book"></div>
+        </div>
+      </section>
+    </details>
 
     <footer>
-      <p>Prototype: 配置・隣接・道具変化の手触りを検証するための簡易版です。</p>
+      <p>Prototype v0.2 — 15戦・3幕 / 付喪神 × カバン整理ローグライト</p>
     </footer>
-  </div>
-
-  <div id="battleModal" class="modal" aria-hidden="true">
-    <div class="battle-panel">
-      <div class="battle-top">
-        <div>
-          <p class="eyebrow">AUTO BATTLE</p>
-          <h2 id="battleEnemyName">小鬼</h2>
-        </div>
-        <span id="battleTimer">0.0s</span>
-      </div>
-
-      <div class="combatant enemy">
-        <div class="combatant-row">
-          <span>敵</span>
-          <strong id="enemyHpLabel">65 / 65</strong>
-        </div>
-        <div class="meter large"><div id="enemyHpBar" class="meter-fill enemy-fill"></div></div>
-      </div>
-
-      <div class="battle-center">対</div>
-
-      <div class="combatant player">
-        <div class="combatant-row">
-          <span>付喪師</span>
-          <strong id="battlePlayerHpLabel">100 / 100</strong>
-        </div>
-        <div class="meter large"><div id="battlePlayerHpBar" class="meter-fill"></div></div>
-        <div class="shield-line">結界 <strong id="shieldLabel">0</strong></div>
-      </div>
-
-      <div class="battle-loadout">
-        <div class="battle-loadout-head">
-          <span>戦闘中のカバン</span>
-          <small>発動した道具が光ります</small>
-        </div>
-        <div id="battleBag" class="battle-bag" aria-label="戦闘中のカバン"></div>
-      </div>
-
-      <div id="battleLog" class="battle-log" aria-live="polite"></div>
-
-      <div id="battleResult" class="battle-result hidden">
-        <h3 id="battleResultTitle">勝利</h3>
-        <p id="battleResultText"></p>
-        <div id="discoveryNotice" class="discovery-notice hidden"></div>
-        <button id="battleCloseButton" class="primary-button" type="button">次へ</button>
-      </div>
-    </div>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
