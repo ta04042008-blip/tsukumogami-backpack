@@ -231,7 +231,25 @@
     }
   };
 
-  const SHOP_POOL = ["sword", "hammer", "mirror", "lantern", "umbrella", "fan", "charm", "medicine", "oil", "flint", "furoshiki"];
+  const SHOP_ENTRIES = [
+    { id: "sword", weight: 14, rarity: "common" },
+    { id: "hammer", weight: 12, rarity: "common" },
+    { id: "lantern", weight: 14, rarity: "common" },
+    { id: "charm", weight: 13, rarity: "common" },
+    { id: "medicine", weight: 11, rarity: "common" },
+    { id: "oil", weight: 10, rarity: "common" },
+    { id: "flint", weight: 10, rarity: "common" },
+    { id: "umbrella", weight: 9, rarity: "uncommon" },
+    { id: "fan", weight: 6, rarity: "uncommon" },
+    { id: "mirror", weight: 4, rarity: "rare" },
+    { id: "furoshiki", weight: 3, rarity: "rare" }
+  ];
+
+  const RARITY_META = {
+    common: { label: "並", className: "rarity-common" },
+    uncommon: { label: "珍", className: "rarity-uncommon" },
+    rare: { label: "希", className: "rarity-rare" }
+  };
 
   const RECIPES = [
     { a: "hammer", b: "mirror", result: "cracked_mirror" },
@@ -304,7 +322,7 @@
       "rerollButton", "enemyPreview", "battleButton", "recipeBook", "recipeProgress",
       "tsukumogamiBook", "tsukumogamiProgress", "resetButton",
       "battleModal", "battleEnemyName", "battleTimer", "enemyHpLabel", "enemyHpBar",
-      "battlePlayerHpLabel", "battlePlayerHpBar", "shieldLabel", "battleLog", "battleResult",
+      "battlePlayerHpLabel", "battlePlayerHpBar", "shieldLabel", "battleBag", "battleLog", "battleResult",
       "battleResultTitle", "battleResultText", "battleCloseButton", "toast"
     ].forEach(id => el[id] = document.getElementById(id));
 
@@ -843,8 +861,14 @@
       }
 
       const def = ITEM_DEFS[typeId];
+      const shopEntry = SHOP_ENTRIES.find(entry => entry.id === typeId);
+      const rarity = RARITY_META[shopEntry?.rarity || "common"];
+      card.classList.add(rarity.className);
       card.innerHTML = `
-        <h3>${def.name}</h3>
+        <div class="shop-title-row">
+          <h3>${def.name}</h3>
+          <span class="rarity-badge ${rarity.className}">${rarity.label}</span>
+        </div>
         <p>${def.description}</p>
         <div class="shop-footer">
           <span class="price">${def.price}文</span>
@@ -891,11 +915,21 @@
     renderAll();
   }
 
+  function weightedShopItem() {
+    const total = SHOP_ENTRIES.reduce((sum, entry) => sum + entry.weight, 0);
+    let roll = Math.random() * total;
+
+    for (const entry of SHOP_ENTRIES) {
+      roll -= entry.weight;
+      if (roll <= 0) return entry.id;
+    }
+
+    return SHOP_ENTRIES[SHOP_ENTRIES.length - 1].id;
+  }
+
   function randomShop() {
     const out = [];
-    for (let i = 0; i < 4; i++) {
-      out.push(SHOP_POOL[Math.floor(Math.random() * SHOP_POOL.length)]);
-    }
+    for (let i = 0; i < 4; i++) out.push(weightedShopItem());
     return out;
   }
 
@@ -1065,6 +1099,7 @@
     for (const item of bagItems()) battle.itemLast.set(item.id, 0);
 
     el.battleEnemyName.textContent = enemyDef.name;
+    renderBattleBag();
     el.battleLog.innerHTML = "";
     el.battleResult.classList.add("hidden");
     el.battleCloseButton.textContent = "次へ";
@@ -1142,7 +1177,46 @@
     updateBattleUi(elapsed);
   }
 
+  function renderBattleBag() {
+    if (!el.battleBag) return;
+    el.battleBag.innerHTML = "";
+
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const cell = document.createElement("div");
+        cell.className = "battle-bag-cell";
+        const item = itemAt(x, y);
+
+        if (item) {
+          const def = defOf(item);
+          cell.classList.add("filled", def.category);
+          cell.dataset.itemId = item.id;
+
+          if (item.x === x && item.y === y) {
+            const label = document.createElement("span");
+            label.textContent = def.name.replace(/^付喪神・/, "").slice(0, 3);
+            cell.appendChild(label);
+          }
+        }
+
+        el.battleBag.appendChild(cell);
+      }
+    }
+  }
+
+  function flashBattleItem(itemId) {
+    if (!el.battleBag) return;
+    const nodes = el.battleBag.querySelectorAll(`[data-item-id="${itemId}"]`);
+    nodes.forEach(node => {
+      node.classList.remove("active");
+      void node.offsetWidth;
+      node.classList.add("active");
+      setTimeout(() => node.classList.remove("active"), 420);
+    });
+  }
+
   function executeItemAction(item, def, mods) {
+    flashBattleItem(item.id);
     const action = def.action;
     const power = Math.max(1, Math.round(action.amount * mods.powerMult + (action.kind === "damage" ? mods.extraDamage : 0)));
 
