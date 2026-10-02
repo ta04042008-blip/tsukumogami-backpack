@@ -75,3 +75,24 @@ body.touch-drag-active .ui-v2{
     display:none !important;
   }
 }
+
+
+.bag-cell.drop-target.drop-valid,
+.staging-slot.drop-target.drop-valid{
+  outline-color:#8bc07b;
+  background:#203024;
+}
+.bag-cell.drop-target.drop-invalid,
+.staging-slot.drop-target.drop-invalid{
+  outline-color:#a55b60;
+  background:#2a1c1f;
+  opacity:.72;
+}
+@media (pointer:coarse){
+  .bag-cell,
+  .staging-slot{
+    -webkit-touch-callout:none;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+}
