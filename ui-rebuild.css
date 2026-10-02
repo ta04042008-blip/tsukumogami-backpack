@@ -1637,3 +1637,59 @@ body.battle-mode .codex-drawer{
     min-height:100%;
   }
 }
+
+
+/* Official 32x32 item art. Source PNGs are exact 32px RGBA and scale only with nearest-neighbor rendering. */
+.item-icon-image{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.item-glyph.has-item-icon,
+.staging-glyph.has-item-icon,
+.detail-glyph.has-item-icon{
+  padding:0;
+  border-color:transparent;
+  background:transparent;
+  box-shadow:none;
+}
+.item-glyph.has-item-icon{
+  width:28px;
+  height:28px;
+}
+.staging-glyph.has-item-icon{
+  width:26px;
+  height:26px;
+}
+.shop-sprite.has-item-icon{
+  padding:2px;
+  background:#19151a;
+  border-color:#5f493f;
+}
+.detail-glyph.has-item-icon{
+  padding:4px;
+}
+.battle-item-visual.has-item-icon{
+  width:24px;
+  height:24px;
+}
+.battle-item-visual .item-icon-image{
+  width:100%;
+  height:100%;
+}
+@media(max-width:520px){
+  .item-glyph.has-item-icon{
+    width:24px;
+    height:24px;
+  }
+  .staging-glyph.has-item-icon{
+    width:20px;
+    height:20px;
+  }
+}
