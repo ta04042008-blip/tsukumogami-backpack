@@ -21,16 +21,22 @@ jobs:
           node-version: "20"
 
       - name: Check JavaScript syntax
-        run: node --check app.js
+        run: |
+          node --check app.js
+          node --check interaction.js
 
       - name: Check required static files
         run: |
           test -f index.html
           test -f styles.css
           test -f app.js
+          test -f interaction.js
+          test -f interaction.css
           test -f GAME_DESIGN.md
           grep -q 'styles.css' index.html
           grep -q 'app.js' index.html
+          grep -q 'interaction.js' index.html
+          grep -q 'interaction.css' index.html
 
       - name: Smoke-test static serving
         run: |
