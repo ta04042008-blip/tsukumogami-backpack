@@ -86,6 +86,9 @@
     el.battleModal.classList.remove("open");
     el.battleModal.setAttribute("aria-hidden", "true");
     renderAll();
+    requestAnimationFrame(() => {
+      el.combatScene?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
     showToast("古刀を一本持って探索を始めます。");
   }
 
@@ -1065,6 +1068,9 @@
     el.battleCloseButton.textContent = "次へ";
     el.battleModal.classList.add("open");
     el.battleModal.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+      el.battleModal.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
     logBattle(`${enemyDef.name}が現れた。`);
 
     updateBattleUi(0);
