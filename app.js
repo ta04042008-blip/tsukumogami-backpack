@@ -33,7 +33,7 @@
     [
       "turnLabel", "playerHpBar", "playerHpLabel", "coinLabel", "stageMap", "combatScene", "sceneFxLayer",
       "sceneEnemyName", "enemySprite", "enemyTrait", "bagGrid", "reactionLinks", "selectionText",
-      "itemDetailName", "itemDetailGlyph", "itemDetailStats",
+      "itemDetailName", "itemDetailGlyph", "itemDetailStats", "itemDetailClose",
       "rotateButton", "storageButton", "sellButton", "stagingArea", "stagingCount", "reactionList", "shopGrid",
       "rerollButton", "enemyPreview", "battleButton", "recipeBook", "recipeProgress",
       "tsukumogamiBook", "tsukumogamiProgress", "resetButton",
@@ -44,6 +44,12 @@
 
     el.rotateButton.addEventListener("click", rotateSelected);
     el.storageButton.addEventListener("click", handleStorageAction);
+    el.itemDetailClose?.addEventListener("click", () => {
+      state.selectedId = null;
+      state.previewType = null;
+      document.body.classList.remove("has-item-detail");
+      renderAll();
+    });
     el.sellButton.addEventListener("click", sellSelected);
     el.rerollButton.addEventListener("click", rerollShop);
     el.battleButton.addEventListener("click", startBattle);
@@ -695,6 +701,7 @@
   function renderSelection() {
     const item = itemById(state.selectedId);
     const previewType = !item ? state.previewType : null;
+    document.body.classList.toggle("has-item-detail", Boolean(item || previewType));
     const disabled = !item || state.inBattle || state.runOver;
     el.rotateButton.disabled = disabled || (!defOf(item).rotatable && !defOf(item).directional);
     el.sellButton.disabled = disabled;
