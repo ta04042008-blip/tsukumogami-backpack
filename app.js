@@ -31,7 +31,7 @@
 
   function init() {
     [
-      "turnLabel", "playerHpBar", "playerHpLabel", "coinLabel", "stageMap", "combatScene",
+      "turnLabel", "playerHpBar", "playerHpLabel", "coinLabel", "stageMap", "combatScene", "sceneFxLayer",
       "sceneEnemyName", "enemySprite", "enemyTrait", "bagGrid", "selectionText",
       "itemDetailName", "itemDetailGlyph", "itemDetailStats",
       "rotateButton", "storageButton", "sellButton", "stagingArea", "stagingCount", "reactionList", "shopGrid",
@@ -1072,6 +1072,7 @@
       el.battleModal.scrollIntoView({ behavior: "smooth", block: "start" });
     });
     logBattle(`${enemyDef.name}が現れた。`);
+    if (enemyDef.boss) showSceneBanner(enemyDef.finalBoss ? "FINAL BOSS" : "BOSS", "boss");
 
     updateBattleUi(0);
     clearBattleTicker();
@@ -1189,6 +1190,24 @@
     setTimeout(() => el.combatScene?.classList.remove(className), 380);
   }
 
+  function spawnSceneFloat(target, text, kind = "damage") {
+    if (!el.sceneFxLayer) return;
+    const node = document.createElement("span");
+    node.className = `scene-float ${target} ${kind}`;
+    node.textContent = text;
+    el.sceneFxLayer.appendChild(node);
+    setTimeout(() => node.remove(), 720);
+  }
+
+  function showSceneBanner(text, kind = "normal") {
+    if (!el.sceneFxLayer) return;
+    const node = document.createElement("strong");
+    node.className = `scene-banner ${kind}`;
+    node.textContent = text;
+    el.sceneFxLayer.appendChild(node);
+    setTimeout(() => node.remove(), 950);
+  }
+
   function executeItemAction(item, def, mods) {
     flashBattleItem(item.id);
     const action = def.action;
@@ -1197,16 +1216,19 @@
     if (action.kind === "damage") {
       flashSceneEffect("enemy-hit");
       const dealt = applyEnemyDamage(power);
+      spawnSceneFloat("enemy", `-${dealt}`, "damage");
       logBattle(`${def.name} → ${dealt}ダメージ`);
     } else if (action.kind === "heal") {
       flashSceneEffect("player-heal");
       const before = battle.playerHp;
       battle.playerHp = Math.min(MAX_HP, battle.playerHp + power);
       const healed = Math.round(battle.playerHp - before);
+      if (healed > 0) spawnSceneFloat("player", `+${healed}`, "heal");
       logBattle(`${def.name} → HP${healed}回復`);
 
       if (action.selfDamage) {
         battle.playerHp = Math.max(0, battle.playerHp - action.selfDamage);
+        spawnSceneFloat("player", `-${action.selfDamage}`, "damage");
         logBattle(`${def.name}の濁りで${action.selfDamage}ダメージ`);
       }
     } else if (action.kind === "shield") {
@@ -1214,6 +1236,7 @@
       const before = battle.shield;
       battle.shield = Math.min(MAX_HP * 0.5, battle.shield + power);
       const gained = Math.max(0, Math.round(battle.shield - before));
+      if (gained > 0) spawnSceneFloat("player", `結界+${gained}`, "shield");
       logBattle(`${def.name} → 結界+${gained}`);
     } else if (action.kind === "hybrid") {
       flashSceneEffect("enemy-hit");
@@ -1222,6 +1245,8 @@
       const before = battle.shield;
       battle.shield = Math.min(MAX_HP * 0.5, battle.shield + shield);
       const gained = Math.max(0, Math.round(battle.shield - before));
+      spawnSceneFloat("enemy", `-${dealt}`, "damage");
+      if (gained > 0) spawnSceneFloat("player", `結界+${gained}`, "shield");
       logBattle(`${def.name} → ${dealt}ダメージ / 結界+${gained}`);
     }
 
@@ -1246,6 +1271,8 @@
     battle.playerHp = Math.max(0, battle.playerHp - hpDamage);
 
     const suffix = blocked > 0 ? `（結界が${blocked}防いだ）` : "";
+    if (hpDamage > 0) spawnSceneFloat("player", `-${hpDamage}`, "damage");
+    if (blocked > 0) spawnSceneFloat("player", `BLOCK ${blocked}`, "shield");
     logBattle(`${battle.enemyDef.name}の${label} → ${hpDamage}ダメージ${suffix}`);
 
     let retaliation = 0;
@@ -1258,6 +1285,7 @@
 
     if (retaliation > 0) {
       const dealt = applyEnemyDamage(retaliation);
+      spawnSceneFloat("enemy", `反撃 -${dealt}`, "retaliation");
       logBattle(`反撃 → ${dealt}ダメージ`);
     }
   }
@@ -1339,6 +1367,7 @@
       }
 
       el.battleResultTitle.textContent = state.runOver ? "踏破！" : "勝利";
+      showSceneBanner(state.runOver ? "踏破！" : "勝利", "win");
 
       const discoveryLines = [];
       if (lastNewRecipes.length) {
@@ -1354,6 +1383,7 @@
     } else {
       state.runOver = true;
       el.battleResultTitle.textContent = "敗北";
+      showSceneBanner("敗北", "lose");
       resultText = "このランは終了です。「最初から」で新しいランを始められます。";
       el.battleCloseButton.textContent = "閉じる";
     }
