@@ -426,7 +426,7 @@
         const def = defOf(item);
         slot.classList.add("filled");
         if (item.id === state.selectedId) slot.classList.add("selected");
-        slot.innerHTML = `<strong>${def.name}</strong><span>${dimensions(item).w}×${dimensions(item).h}</span>`;
+        slot.innerHTML = `<span class="staging-glyph">${itemGlyph(item)}</span><strong>${shortItemName(item)}</strong><span>${dimensions(item).w}×${dimensions(item).h}</span>`;
         slot.addEventListener("click", () => {
           if (state.inBattle || state.runOver) return;
           state.previewType = null;
@@ -1273,6 +1273,11 @@
       const awakenings = advanceUsageYears(reactions);
       lastNewRecipes = [];
       const changes = applyTransformations(reactions);
+      if (awakenings.length) {
+        flashSceneEffect("scene-awaken");
+      } else if (changes.length) {
+        flashSceneEffect("scene-transform");
+      }
       const changeText = changes.length ? " 道具変化：" + changes.join("、") : "";
       const awakeningText = awakenings.length ? " 付喪神化：" + awakenings.join("、") : "";
 
