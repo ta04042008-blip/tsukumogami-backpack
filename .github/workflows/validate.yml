@@ -35,6 +35,11 @@ jobs:
           test -f assets/tsukumoshi_idle_right_64x64.png
           test -f assets/characters/tsukumoshi_idle_right_64x64.png
           test -f assets/enemies/kogoni_idle_left_64x64.png
+          test -f assets/items/kotou_32x32.png
+          test -f assets/items/hammer_32x32.png
+          test -f assets/items/mirror_32x32.png
+          test -f assets/items/flint_32x32.png
+          test -f assets/items/oil_32x32.png
           test -f app.js
           test -f game-data.js
           test -f interaction.js
