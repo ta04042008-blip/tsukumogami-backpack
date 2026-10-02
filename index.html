@@ -17,7 +17,6 @@
         <p class="eyebrow">TSUKUMOGAMI BACKPACK</p>
         <h1>付喪神バックパック <span>16-BIT Prototype v0.2</span></h1>
       </div>
-      <button id="resetButton" class="ghost-button compact-button" type="button">最初から</button>
     </header>
 
     <section id="combatScene" class="combat-scene game-arena" aria-label="次の戦闘">
@@ -29,9 +28,12 @@
           <span>道中</span>
           <strong id="turnLabel">1 / 15 ・ 第1幕</strong>
         </div>
-        <div class="currency-box">
-          <span>所持金</span>
-          <strong id="coinLabel">10文</strong>
+        <div class="arena-hud-actions">
+          <div class="currency-box">
+            <span>所持金</span>
+            <strong id="coinLabel">10文</strong>
+          </div>
+          <button id="resetButton" class="arena-reset" type="button" aria-label="ランを最初からやり直す">↺</button>
         </div>
       </div>
 
