@@ -165,6 +165,23 @@
     return true;
   }
 
+  function canPlaceIgnoring(item, x, y, rot, ignoreIds) {
+    const cells = cellsFor(item, x, y, rot);
+    if (!cells.length) return false;
+
+    for (const cell of cells) {
+      if (cell.x < 0 || cell.x >= COLS || cell.y < 0 || cell.y >= ROWS) return false;
+
+      for (const other of bagItems()) {
+        if (ignoreIds.has(other.id)) continue;
+        if (cellsFor(other).some(occupied => occupied.x === cell.x && occupied.y === cell.y)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   function areAdjacent(a, b) {
     if (a.location !== "bag" || b.location !== "bag") return false;
     const bSet = new Set(cellsFor(b).map(c => `${c.x},${c.y}`));
@@ -391,6 +408,30 @@
 
     if (occupiedId) {
       state.previewType = null;
+
+      if (state.selectedId && state.selectedId !== occupiedId) {
+        const selected = itemById(state.selectedId);
+        const target = itemById(occupiedId);
+
+        if (selected?.location === "bag" && target?.location === "bag") {
+          const ignoreIds = new Set([selected.id, target.id]);
+          const selectedCanMove = canPlaceIgnoring(selected, target.x, target.y, selected.rot, ignoreIds);
+          const targetCanMove = canPlaceIgnoring(target, selected.x, selected.y, target.rot, ignoreIds);
+
+          if (selectedCanMove && targetCanMove) {
+            const sx = selected.x;
+            const sy = selected.y;
+            selected.x = target.x;
+            selected.y = target.y;
+            target.x = sx;
+            target.y = sy;
+            showToast("道具の位置を入れ替えました。");
+            renderAll();
+            return;
+          }
+        }
+      }
+
       state.selectedId = occupiedId;
       renderAll();
       return;
