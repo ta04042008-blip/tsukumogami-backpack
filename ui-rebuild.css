@@ -972,3 +972,29 @@ body.battle-mode .codex-drawer{
   60%{filter:brightness(1.9) saturate(1.6)}
   80%{filter:brightness(1.2) hue-rotate(24deg)}
 }
+
+
+/* Official 64x64 Tsukumoshi sprite.
+   Idle is a game-side 1px shift every 0.4s; no extra bitmap frames are used. */
+.hero-sprite img{
+  display:block;
+  width:64px;
+  height:64px;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+  transform-origin:50% 100%;
+  animation:tsukumoshi-idle-dot-shift .8s steps(1,end) infinite;
+}
+@keyframes tsukumoshi-idle-dot-shift{
+  0%,49.999%{transform:translateY(0)}
+  50%,100%{transform:translateY(-1px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .hero-sprite img{animation:none}
+}
+@media(max-width:520px){
+  .hero-sprite img{
+    width:64px;
+    height:64px;
+  }
+}
