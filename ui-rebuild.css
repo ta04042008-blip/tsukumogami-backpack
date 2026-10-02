@@ -975,32 +975,49 @@ body.battle-mode .codex-drawer{
 
 
 /* Official 64x64 Tsukumoshi sprite.
-   Idle is a game-side 1px upper-body shift every 0.4s.
-   The ground-contact pixels stay fixed so the feet do not slide. */
+   Idle: upper 58px shifts by 1px every 0.4s; bottom 6px stays anchored.
+   Overflow windows are used instead of clip-path for reliable iOS Safari rendering. */
 .hero-sprite-stack{
   position:relative;
   width:64px;
   height:64px;
   flex:0 0 64px;
+  overflow:visible;
 }
-.hero-sprite-stack img{
+.hero-upper-window,
+.hero-feet-window{
   position:absolute;
-  inset:0;
+  left:0;
+  width:64px;
+  overflow:hidden;
+  pointer-events:none;
+}
+.hero-upper-window{
+  top:0;
+  height:59px;
+}
+.hero-feet-window{
+  top:58px;
+  height:6px;
+}
+.hero-upper-window img,
+.hero-feet-window img{
+  position:absolute;
+  left:0;
   display:block;
   width:64px;
   height:64px;
+  max-width:none;
   image-rendering:pixelated;
   image-rendering:crisp-edges;
   pointer-events:none;
 }
 .hero-upper{
-  /* Keep a 2px overlap with the fixed foot layer to avoid a seam. */
-  clip-path:inset(0 0 4px 0);
+  top:0;
   animation:tsukumoshi-idle-upper-shift .8s steps(1,end) infinite;
 }
 .hero-feet{
-  /* Bottom 6px (plus 2px overlap) are anchored to the ground. */
-  clip-path:inset(58px 0 0 0);
+  top:-58px;
 }
 @keyframes tsukumoshi-idle-upper-shift{
   0%,49.999%{transform:translateY(0)}
