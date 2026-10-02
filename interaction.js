@@ -77,6 +77,27 @@
   // so this mirrors the same select -> empty-cell click flow with Pointer Events.
   let pointerDrag = null;
 
+  function createTouchGhost(source) {
+    const ghost = document.createElement("div");
+    ghost.className = "touch-drag-ghost";
+    ghost.innerHTML = source.innerHTML;
+    ghost.setAttribute("aria-hidden", "true");
+    document.body.appendChild(ghost);
+    return ghost;
+  }
+
+  function moveTouchGhost(ghost, x, y, target) {
+    if (!ghost) return;
+    ghost.style.left = `${x}px`;
+    ghost.style.top = `${y - 58}px`;
+    ghost.classList.toggle("can-drop", Boolean(target && !target.classList.contains("place-invalid")));
+    ghost.classList.toggle("cannot-drop", Boolean(target?.classList.contains("place-invalid")));
+  }
+
+  function removeTouchGhost(ghost) {
+    if (ghost?.isConnected) ghost.remove();
+  }
+
   document.addEventListener("pointerdown", event => {
     if (event.pointerType === "mouse") return;
     const source = event.target.closest(selectors.draggable);
@@ -88,7 +109,8 @@
       startX: event.clientX,
       startY: event.clientY,
       active: false,
-      target: null
+      target: null,
+      ghost: null
     };
   }, { passive: true });
 
@@ -101,8 +123,10 @@
 
     if (!pointerDrag.active) {
       pointerDrag.active = true;
+      pointerDrag.ghost = createTouchGhost(pointerDrag.source);
       pointerDrag.source.classList.add("dragging");
       pointerDrag.source.click();
+      document.body.classList.add("touch-drag-active");
     }
 
     event.preventDefault();
@@ -112,6 +136,7 @@
     const target = underPointer?.closest?.(`${selectors.bagDrop}, ${selectors.stagingDrop}`) || null;
     pointerDrag.target = target;
     if (target) target.classList.add("drop-target");
+    moveTouchGhost(pointerDrag.ghost, event.clientX, event.clientY, target);
   }, { passive: false });
 
   function finishPointerDrag(event) {
@@ -123,6 +148,8 @@
       event.preventDefault();
       drag.source.classList.remove("dragging");
       clearDropTargets();
+      removeTouchGhost(drag.ghost);
+      document.body.classList.remove("touch-drag-active");
       if (drag.target?.isConnected) drag.target.click();
     }
   }
@@ -131,6 +158,8 @@
   document.addEventListener("pointercancel", event => {
     if (!pointerDrag || pointerDrag.id !== event.pointerId) return;
     pointerDrag.source.classList.remove("dragging");
+    removeTouchGhost(pointerDrag.ghost);
+    document.body.classList.remove("touch-drag-active");
     pointerDrag = null;
     clearDropTargets();
   });
