@@ -324,3 +324,31 @@ footer{text-align:center;color:#777;font-size:.72rem;padding-top:16px}
   box-shadow:0 0 0 2px #f1c57b, 0 0 18px rgba(241,197,123,.45);
   filter:brightness(1.35);
 }
+
+
+.discovery-notice{
+  margin:10px 0 12px;
+  padding:11px 12px;
+  border:1px solid #8c6d3f;
+  border-radius:12px;
+  background:
+    radial-gradient(circle at top right,rgba(224,154,86,.18),transparent 12rem),
+    #2a231a;
+  color:#f4dfb7;
+  font-size:.82rem;
+  line-height:1.45;
+  animation:discovery-pop .36s ease-out;
+}
+.discovery-notice strong{
+  color:#ffd790;
+  letter-spacing:.04em;
+}
+.discovery-notice hr{
+  border:0;
+  border-top:1px solid rgba(255,215,144,.2);
+  margin:9px 0;
+}
+@keyframes discovery-pop{
+  from{opacity:0;transform:translateY(8px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
