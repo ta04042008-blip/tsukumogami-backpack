@@ -92,8 +92,9 @@
 
 ## V4 reference pass (CSS only)
 
-- Layout rows (phones >= 680px tall): arena (HUD + route + fighters) takes the remaining height, then staging pockets + small actions, the 6x5 bag, the shelf, and the start button.
-- The bag width is derived from the viewport (`--v4-bag-w`, capped at 94% of the screen) so cells stay square and as large as possible; battle mode keeps the bag the same size and gives the freed height to the arena.
-- Fighters are drawn at integer scales (2x prep, 3x battle) on tall phones; short phones (<= 780px) use 1.5x / 2x and drop name plates and shop captions.
+- One-screen layout applies to phones >= 660px tall (375x667 included). Rows: arena (HUD + route + fighters, takes the remaining height), staging pockets + small actions, the 6x5 bag, the shelf, the start button.
+- Everything that places pixel art uses whole CSS px: shop/start/staging heights come from per-height bands, the bag is built from an integer cell size (frame = 6c+30 x 5c+31), fighters use integer margins and `transform:scale()` of 1x / 2x / 3x only (3x in battle only at >= 430px wide). `round()` is used for the viewport height and the battle arena height.
+- Battle: arena is ~52% of the viewport, the bag keeps its prep size right below it, HP/shield HUD is player-left / enemy-right (10-13px text).
+- Boss fights keep a vermilion/gold pixel frame on the arena.
 - Item detail stays a fixed overlay over the arena and never shifts the layout.
-- Cache version: `?v=20261002e`.
+- Cache version: `?v=20261002f`.

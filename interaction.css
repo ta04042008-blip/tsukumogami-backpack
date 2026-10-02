@@ -70,7 +70,7 @@ body.touch-drag-active .ui-v2{
   -webkit-user-select:none;
 }
 
-@media (max-width:520px) and (min-height:680px){
+@media (max-width:520px) and (min-height:660px){
   body.touch-drag-active .prep-sidebar{
     display:none !important;
   }

@@ -1239,7 +1239,7 @@ body.battle-mode .codex-drawer{
 
 /* Tall phone playfield: route, encounter, backpack, shop and start all fit in one viewport.
    Short phones keep the normal scroll layout rather than crushing the backpack. */
-@media (max-width:520px) and (min-height:680px){
+@media (max-width:520px) and (min-height:660px){
   html,
   body{
     height:100%;
@@ -1726,7 +1726,7 @@ body.battle-mode .codex-drawer{
 
 
 /* Very short one-screen layouts need a little more breathing room around the icon. */
-@media(max-width:520px) and (min-height:680px) and (max-height:720px){
+@media(max-width:520px) and (min-height:660px) and (max-height:720px){
   .item-glyph.has-item-icon{
     width:30px;
     height:30px;
@@ -2298,7 +2298,7 @@ body.battle-mode .game-screen-v3 .reaction-links{
   }
 }
 
-@media(max-width:520px) and (min-height:680px){
+@media(max-width:520px) and (min-height:660px){
   html,
   body{
     height:100%;
@@ -2411,7 +2411,7 @@ body.battle-mode .game-screen-v3 .reaction-links{
 }
 
 /* On short phones retain scrolling instead of squeezing the playfield beyond usability. */
-@media(max-width:520px) and (max-height:679px){
+@media(max-width:520px) and (max-height:659px){
   html,
   body{
     overflow:auto;
@@ -2450,40 +2450,66 @@ body.battle-mode .game-screen-v3 .reaction-links{
 
 
 /* ==========================================================================
-   GAME SCREEN V4 - reference-image pass (390x844 baseline, valid 680px and up)
-   Layout only: one arena (HUD + route + fighters), persistent bag, shelf, start.
-   The bag is sized from the viewport so its 6x5 cells stay as large as possible.
+   GAME SCREEN V4 - reference-image pass (one-screen phones, 660px tall and up)
+   Layout only. Everything that places pixel art is built from whole CSS px:
+   - per-height bands fix the shop / start / staging rows (no dvh fractions),
+   - the bag is sized from an integer cell size (frame = 6c+30 x 5c+31),
+   - fighters are positioned with integer margins and scaled 1x / 2x / 3x only.
    ========================================================================== */
-@media(max-width:520px) and (min-height:680px){
+@media(max-width:520px) and (min-height:660px){
   .game-screen-v3{
-    --v4-gap:4px;
-    --v4-shop:clamp(90px,13.4dvh,120px);
-    --v4-start:clamp(48px,7.4dvh,64px);
-    --v4-stage:42px;
-    --v4-arena-min:clamp(196px,29dvh,270px);
-    --v4-bag-w:min(
-      94%,
-      calc(
-        (100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 6px
-          - 4 * var(--v4-gap) - var(--v4-shop) - var(--v4-start) - var(--v4-stage)
-          - var(--v4-arena-min)) * 1.2
-      )
-    );
+    --s-shop:88px;
+    --s-start:46px;
+    --s-stage:38px;
+    --v4-arena-min:212px;
+    --v4-h:round(down,100dvh,1px);
+    --v4-fixed:calc(env(safe-area-inset-top) + env(safe-area-inset-bottom) + 25px + var(--s-shop) + var(--s-start) + var(--s-stage));
+    --v4-cell-w:round(down,calc((94 * (100vw - 8px) / 100 - 30px) / 6),1px);
+    --v4-cell-h:round(down,calc((var(--v4-h) - var(--v4-fixed) - var(--v4-arena-min) - 31px) / 5),1px);
+    --v4-cell:min(var(--v4-cell-w),var(--v4-cell-h));
+    --v4-arena-b:max(212px,round(down,52dvh,1px));
     --sprite-scale:2;
-    gap:var(--v4-gap);
+    --vis-inset:24px;
+    --fx-bottom:26px;
+    --fx-pad:calc(var(--vis-inset) + 32px * (var(--sprite-scale) - 1));
+    height:var(--v4-h);
+    max-height:var(--v4-h);
+    gap:4px;
     padding:
       calc(env(safe-area-inset-top) + 3px)
       4px
       calc(env(safe-area-inset-bottom) + 3px);
-    grid-template-rows:minmax(0,1fr) auto var(--v4-shop) var(--v4-start);
+    grid-template-rows:minmax(0,1fr) auto var(--s-shop) var(--s-start);
   }
 
   body.battle-mode .game-screen-v3{
-    --sprite-scale:3;
-    grid-template-rows:minmax(0,1fr) auto;
+    --fx-bottom:36px;
+    grid-template-rows:var(--v4-arena-b) auto;
+    align-content:start;
   }
 
-  /* ---- arena: fills whatever the bag, shelf and start button leave ---- */
+  /* integer row budgets per height band */
+  @media(min-height:700px){
+    .game-screen-v3{--s-shop:92px;--s-start:50px;--s-stage:40px}
+  }
+  @media(min-height:740px){
+    .game-screen-v3{--s-shop:100px;--s-start:56px;--s-stage:40px}
+  }
+  @media(min-height:800px){
+    .game-screen-v3{--s-shop:112px;--s-start:62px;--s-stage:42px}
+  }
+  @media(min-height:900px){
+    .game-screen-v3{--s-shop:120px;--s-start:64px;--s-stage:44px}
+  }
+  /* 3x only where two 192px fighters leave a clear gap in battle */
+  @media(min-width:430px){
+    body.battle-mode .game-screen-v3{
+      --sprite-scale:3;
+      --vis-inset:6px;
+    }
+  }
+
+  /* ---- arena ---- */
   .game-screen-v3 .game-arena,
   body.battle-mode .game-screen-v3 .game-arena{
     grid-row:1;
@@ -2492,40 +2518,44 @@ body.battle-mode .game-screen-v3 .reaction-links{
   }
 
   .game-screen-v3 .arena-hud{
-    top:5px;
+    top:4px;
     left:6px;
     right:6px;
+    height:26px;
   }
 
   .game-screen-v3 .route-status{
-    padding:3px 6px;
+    height:26px;
+    box-sizing:border-box;
+    padding:0 6px;
   }
 
-  .game-screen-v3 .route-status span{
-    display:none;
-  }
-
-  .game-screen-v3 .arena-hud .currency-box{
-    padding:3px 6px;
-  }
-
+  .game-screen-v3 .route-status span,
   .game-screen-v3 .arena-hud .currency-box span{
     display:none;
   }
 
+  .game-screen-v3 .arena-hud .currency-box{
+    height:26px;
+    box-sizing:border-box;
+    display:flex;
+    align-items:center;
+    padding:0 6px;
+  }
+
   .game-screen-v3 .arena-hud .currency-box strong{
     color:#ffd774;
-    font-size:.78rem;
+    font-size:13px;
   }
 
   .game-screen-v3 .arena-reset{
-    width:28px;
-    height:28px;
-    min-width:28px;
+    width:26px;
+    height:26px;
+    min-width:26px;
   }
 
   .game-screen-v3 .arena-route{
-    top:38px;
+    top:34px;
     left:6px;
     right:6px;
   }
@@ -2533,16 +2563,22 @@ body.battle-mode .game-screen-v3 .reaction-links{
   .game-screen-v3 .arena-route .stage-node{
     height:16px;
     min-height:16px;
+    font-size:9px;
   }
 
-  /* preparation info strip sits on the ground line, below the fighters */
+  .game-screen-v3 .arena-route .stage-node.boss::before{
+    font-size:8px;
+  }
+
+  /* preparation: one 18px strip on the ground line (HP left, encounter right) */
   .game-screen-v3 .scene-info{
     top:auto;
-    bottom:5px;
+    bottom:4px;
     left:8px;
     right:8px;
+    height:18px;
     grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    align-items:end;
+    align-items:center;
     gap:10px;
   }
 
@@ -2557,95 +2593,98 @@ body.battle-mode .game-screen-v3 .reaction-links{
   }
 
   .game-screen-v3 .encounter-label strong{
-    font-size:.58rem;
+    font-size:10px;
+    text-shadow:1px 1px 0 #000;
   }
 
   .game-screen-v3 .scene-player-hp{
     order:1;
-    grid-template-columns:auto minmax(0,1fr);
+    grid-template-columns:auto minmax(0,1fr) auto;
+    align-items:center;
+    gap:4px;
   }
 
   .game-screen-v3 .scene-player-hp > span,
   .game-screen-v3 .scene-player-hp > strong{
-    font-size:.52rem;
+    margin:0;
+    font-size:10px;
+    line-height:1;
     text-shadow:1px 1px 0 #000;
+    white-space:nowrap;
   }
 
-  .game-screen-v3 .scene-player-hp > strong{
-    grid-column:1 / -1;
-    margin-top:-1px;
+  .game-screen-v3 .scene-player-hp .meter{
+    height:10px;
   }
 
   body.battle-mode .game-screen-v3 .scene-info{
     display:none;
   }
 
-  /* fighters are drawn 2x (3x in battle) with integer pixel scaling */
-  .game-screen-v3 .fighters{
-    bottom:30px;
-    height:auto;
-    top:62px;
-    padding:0 6px;
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  /* ---- fighters: whole-pixel boxes, margins and scales ---- */
+  .game-screen-v3 .fighters,
+  body.battle-mode .game-screen-v3 .fighters{
+    position:absolute;
+    top:auto;
+    left:0;
+    right:0;
+    bottom:var(--fx-bottom);
+    height:64px;
+    padding:0 var(--fx-pad);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
     gap:0;
   }
 
-  body.battle-mode .game-screen-v3 .fighters{
-    bottom:34px;
-    height:auto;
-    top:54px;
+  .game-screen-v3 .fighter{
+    width:64px;
+    height:64px;
+    flex:0 0 64px;
+    min-width:0;
+    margin:0;
+    justify-content:flex-end;
   }
 
   .game-screen-v3 .fighter-name{
-    display:block;
-    position:relative;
-    z-index:3;
-    margin:0 0 2px;
-    padding:1px 6px;
-    border:1px solid #6a5146;
-    background:rgba(19,13,19,.88);
-    color:#f3dfb0;
-    font-size:.5rem;
-    white-space:nowrap;
-  }
-
-  body.battle-mode .game-screen-v3 .fighter-name{
     display:none;
   }
 
-  .game-screen-v3 .fighter-caption{
-    display:none;
-  }
-
-  .game-screen-v3 .pixel-fighter,
-  body.battle-mode .game-screen-v3 .pixel-fighter{
-    margin-top:calc(64px * (var(--sprite-scale) - 1));
-    transform:scale(var(--sprite-scale));
-    transform-origin:center bottom;
-  }
-
+  .game-screen-v3 .fighter-caption,
   .game-screen-v3 .versus-mark,
   body.battle-mode .game-screen-v3 .versus-mark{
     display:none;
   }
 
-  /* enemies without an official 64x64 sprite keep a modest placeholder size */
+  .game-screen-v3 .pixel-fighter,
+  body.battle-mode .game-screen-v3 .pixel-fighter{
+    width:64px;
+    height:64px;
+    margin:0;
+    transform:scale(var(--sprite-scale));
+    transform-origin:50% 100%;
+  }
+
+  /* placeholder enemies (no official 64x64 art) stay at 1x */
   .game-screen-v3 .enemy-sprite:not(.official-kogoni){
-    --sprite-scale:1.25;
+    --sprite-scale:1;
   }
 
   .game-screen-v3 .fighter::after{
-    height:calc(10px + 8px * var(--sprite-scale));
-    width:min(40vw,170px);
+    left:calc(32px - 32px * var(--sprite-scale));
+    width:calc(64px * var(--sprite-scale));
+    height:calc(10px + 6px * var(--sprite-scale));
+    bottom:0;
+    transform:none;
   }
 
   .game-screen-v3 .game-arena::after{
     height:38%;
   }
 
-  /* battle overlay: only timer + HP/shield HUD, everything else stays on the field */
+  /* ---- battle HUD: player (left) / enemy (right), 10-13px text ---- */
   .game-screen-v3 .arena-battle-hud .battle-top{
-    top:58px;
+    top:52px;
     left:auto;
     right:8px;
   }
@@ -2654,25 +2693,74 @@ body.battle-mode .game-screen-v3 .reaction-links{
     display:none;
   }
 
-  .game-screen-v3 .arena-battle-hud .battle-hp-row{
-    bottom:6px;
-    left:8px;
-    right:8px;
-    gap:18px;
+  .game-screen-v3 .arena-battle-hud #battleTimer{
+    padding:2px 6px;
+    font-size:11px;
+    line-height:1.2;
   }
 
-  .game-screen-v3 .arena-battle-hud .meter.large{
-    height:10px;
+  .game-screen-v3 .arena-battle-hud .battle-hp-row{
+    left:8px;
+    right:8px;
+    bottom:4px;
+    min-height:28px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:16px;
+    align-items:end;
+  }
+
+  .game-screen-v3 .arena-battle-hud .combatant.player{
+    grid-column:1;
+    grid-row:1;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    column-gap:6px;
+  }
+
+  .game-screen-v3 .arena-battle-hud .combatant.enemy{
+    grid-column:2;
+    grid-row:1;
   }
 
   .game-screen-v3 .arena-battle-hud .combatant-row{
-    font-size:.56rem;
+    grid-column:1 / -1;
+    gap:4px;
+    font-size:11px;
+    line-height:14px;
+    text-shadow:1px 1px 0 #000;
+  }
+
+  .game-screen-v3 .arena-battle-hud .meter.large{
+    grid-column:1;
+    height:12px;
+    margin-top:2px;
+  }
+
+  .game-screen-v3 .arena-battle-hud .shield-line{
+    position:static;
+    grid-column:2;
+    grid-row:2;
+    align-self:end;
+    margin:0;
+    font-size:11px;
+    line-height:12px;
+    white-space:nowrap;
     text-shadow:1px 1px 0 #000;
   }
 
   .game-screen-v3 .arena-battle-hud .battle-result{
     width:min(78%,280px);
     padding:8px 10px;
+  }
+
+  /* boss arena keeps its vermilion/gold pixel frame */
+  .game-screen-v3 .combat-scene.boss-scene{
+    border-color:#a8452f;
+    box-shadow:
+      4px 5px 0 #080609,
+      inset 0 0 0 2px #e2ad50,
+      inset 0 0 0 4px #6d2a24;
   }
 
   /* ---- backpack: staging pockets + tiny actions on one row, bag below ---- */
@@ -2688,8 +2776,8 @@ body.battle-mode .game-screen-v3 .reaction-links{
     padding:0;
     display:grid;
     grid-template-columns:minmax(0,1fr) auto;
-    grid-template-rows:var(--v4-stage) auto;
-    gap:3px 3px;
+    grid-template-rows:var(--s-stage) auto;
+    gap:3px;
     align-items:stretch;
     overflow:visible;
   }
@@ -2739,8 +2827,8 @@ body.battle-mode .game-screen-v3 .reaction-links{
   }
 
   .game-screen-v3 .staging-glyph.has-item-icon{
-    width:28px;
-    height:28px;
+    width:24px;
+    height:24px;
   }
 
   .game-screen-v3 .inventory-topbar{
@@ -2766,7 +2854,7 @@ body.battle-mode .game-screen-v3 .reaction-links{
     min-height:0;
     height:100%;
     padding:0;
-    font-size:.5rem;
+    font-size:8px;
     letter-spacing:0;
   }
 
@@ -2776,43 +2864,65 @@ body.battle-mode .game-screen-v3 .reaction-links{
     grid-row:2;
     justify-self:center;
     align-self:start;
-    width:var(--v4-bag-w);
-    max-width:94%;
-    height:auto;
-    aspect-ratio:6/5;
+    box-sizing:border-box;
+    width:calc(6 * var(--v4-cell) + 30px);
+    height:calc(5 * var(--v4-cell) + 31px);
+    max-width:100%;
+    aspect-ratio:auto;
   }
 
   body.battle-mode .game-screen-v3 .backpack-frame{
     grid-row:1;
   }
 
+  .game-screen-v3 .backpack-frame .bag-grid{
+    width:100%;
+    height:100%;
+    grid-template-columns:repeat(6,var(--v4-cell));
+    grid-template-rows:repeat(5,var(--v4-cell));
+    justify-content:center;
+    align-content:center;
+  }
+
+  .game-screen-v3 .backpack-frame .bag-cell{
+    width:var(--v4-cell);
+    height:var(--v4-cell);
+    aspect-ratio:auto;
+  }
+
+  .game-screen-v3 .item-glyph.has-item-icon{
+    width:32px;
+    height:32px;
+  }
+
   /* ---- shop shelf: four wooden tags directly under the bag ---- */
   .game-screen-v3 .shelf-card{
-    height:var(--v4-shop);
-    padding:2px 3px 3px;
+    height:var(--s-shop);
+    padding:2px 3px;
     border-width:2px;
     display:grid;
-    grid-template-rows:14px minmax(0,1fr);
+    grid-template-rows:12px minmax(0,1fr);
     gap:2px;
   }
 
   .game-screen-v3 .shop-heading{
-    height:14px;
+    height:12px;
     margin:0;
     padding:0 2px;
   }
 
   .game-screen-v3 .shop-heading h2{
-    font-size:.52rem;
+    font-size:9px;
     letter-spacing:.14em;
     color:#e2bb73;
   }
 
   .game-screen-v3 .shop-heading button{
     min-height:0;
-    height:14px;
+    height:12px;
     padding:0 5px;
-    font-size:.44rem;
+    font-size:8px;
+    line-height:1;
   }
 
   .game-screen-v3 .shop-shelf{
@@ -2825,7 +2935,7 @@ body.battle-mode .game-screen-v3 .reaction-links{
 
   .game-screen-v3 .shop-shelf .shop-item{
     height:100%;
-    padding:2px 2px 3px;
+    padding:1px 2px 2px;
     display:grid;
     grid-template-rows:auto minmax(0,1fr) auto;
     justify-items:center;
@@ -2850,7 +2960,7 @@ body.battle-mode .game-screen-v3 .reaction-links{
   .game-screen-v3 .shop-title-row h3{
     overflow:hidden;
     margin:0;
-    font-size:.52rem;
+    font-size:9px;
     text-overflow:ellipsis;
     white-space:nowrap;
     color:#f0dcae;
@@ -2876,7 +2986,7 @@ body.battle-mode .game-screen-v3 .reaction-links{
 
   .game-screen-v3 .shop-footer .price{
     color:#ffd774;
-    font-size:.56rem;
+    font-size:10px;
     line-height:1;
     text-align:left;
     white-space:nowrap;
@@ -2888,7 +2998,7 @@ body.battle-mode .game-screen-v3 .reaction-links{
     min-height:0;
     height:18px;
     padding:0;
-    font-size:.54rem;
+    font-size:10px;
     line-height:1;
   }
 
@@ -2901,48 +3011,12 @@ body.battle-mode .game-screen-v3 .reaction-links{
 
   .game-screen-v3 .shop-shelf .shop-item:not(:has(.shop-sprite)) h3{
     margin:0;
-    font-size:.56rem;
+    font-size:10px;
     color:#8a7a6a;
   }
 
-  /* night shrine arena: hard-edged bands, moon and torii silhouette, no smooth gradients */
-  .game-screen-v3 .combat-scene{
-    --sky-a:#0d1230;
-    --sky-b:#141a3f;
-    --sky-c:#1b2250;
-    --sky-d:#262050;
-    --ground:#171226;
-    background:
-      radial-gradient(circle at 87% 42%,#f2ebc2 0 11px,#bdb894 11px 13px,transparent 13px),
-      linear-gradient(#6b2530,#6b2530) 50% 31% / 56% 7px no-repeat,
-      linear-gradient(#5a1f29,#5a1f29) 50% 40% / 46% 5px no-repeat,
-      linear-gradient(#5a1f29,#5a1f29) 27% 100% / 7px 69% no-repeat,
-      linear-gradient(#5a1f29,#5a1f29) 73% 100% / 7px 69% no-repeat,
-      linear-gradient(180deg,var(--sky-a) 0 20%,var(--sky-b) 20% 38%,var(--sky-c) 38% 54%,var(--sky-d) 54% 66%,var(--ground) 66% 100%);
-  }
-
-  .game-screen-v3 .combat-scene[data-act="2"]{
-    --sky-a:#10162c;
-    --sky-b:#18203a;
-    --sky-c:#232846;
-    --sky-d:#2d2848;
-    --ground:#191426;
-  }
-
-  .game-screen-v3 .combat-scene[data-act="3"]{
-    --sky-a:#1a0f1f;
-    --sky-b:#27121f;
-    --sky-c:#35172a;
-    --sky-d:#40202c;
-    --ground:#170e16;
-  }
-
-  .game-screen-v3 .scene-sky{
-    display:none;
-  }
-
   .game-screen-v3 .start-panel{
-    height:var(--v4-start);
+    height:var(--s-start);
     padding:0;
   }
 
@@ -2953,7 +3027,7 @@ body.battle-mode .game-screen-v3 .reaction-links{
 
   /* ---- item detail: a small tag laid over the scene, never part of the layout ---- */
   body.has-item-detail:not(.battle-mode) .game-screen-v3 .prep-sidebar{
-    top:calc(env(safe-area-inset-top) + 58px);
+    top:calc(env(safe-area-inset-top) + 54px);
     left:12px;
     right:12px;
     max-height:30dvh;
@@ -3003,17 +3077,27 @@ body.battle-mode .game-screen-v3 .reaction-links{
   }
 }
 
-@media(max-width:520px) and (min-height:680px) and (max-height:780px){
-  .game-screen-v3{
-    --sprite-scale:1.5;
+/* name plates only where the arena is tall enough to carry them */
+@media(max-width:520px) and (min-height:781px){
+  body:not(.battle-mode) .game-screen-v3 .fighter-name{
+    display:block;
+    position:absolute;
+    left:50%;
+    bottom:calc(64px * var(--sprite-scale) + 3px);
+    z-index:3;
+    margin:0;
+    padding:1px 6px;
+    transform:translateX(-50%);
+    border:1px solid #6a5146;
+    background:rgba(19,13,19,.88);
+    color:#f3dfb0;
+    font-size:10px;
+    white-space:nowrap;
   }
-  body.battle-mode .game-screen-v3{
-    --sprite-scale:2;
-  }
-  /* short phones: drop the name plates and shop captions so nothing collides with the HUD */
-  .game-screen-v3 .fighter-name{
-    display:none;
-  }
+}
+
+/* short phones: drop the shop captions so the 32px icon + price row fits */
+@media(max-width:520px) and (min-height:660px) and (max-height:780px){
   .game-screen-v3 .shop-shelf .shop-item{
     grid-template-rows:minmax(0,1fr) auto;
   }
