@@ -274,7 +274,7 @@
     { a: "lit_lantern", b: "mirror", result: "reflecting_lantern" }
   ];
   
-  const AWAKEN_BATTLES = 3;
+  const AWAKEN_BATTLES = 2;
   const AWAKENINGS = {
     curse_return_mirror: "kaeshi_mirror",
     flame_blade: "fire_eater_blade",
