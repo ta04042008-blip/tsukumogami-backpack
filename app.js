@@ -824,6 +824,10 @@
     const enemy = ENEMIES[Math.min(state.turn - 1, ENEMIES.length - 1)];
     const battleType = enemy.boss ? "BOSS" : "ENCOUNTER";
     el.enemyPreview.textContent = `第${enemy.act || 1}幕 / ${battleType}　${enemy.name}　HP ${enemy.hp}`;
+    if (el.combatScene) {
+      el.combatScene.dataset.act = String(enemy.act || 1);
+      el.combatScene.classList.toggle("boss-scene", Boolean(enemy.boss));
+    }
     if (el.sceneEnemyName) el.sceneEnemyName.textContent = enemy.name;
     if (el.enemySprite) {
       const span = el.enemySprite.querySelector("span");
@@ -1130,15 +1134,25 @@
     });
   }
 
+  function flashSceneEffect(className) {
+    if (!el.combatScene) return;
+    el.combatScene.classList.remove(className);
+    void el.combatScene.offsetWidth;
+    el.combatScene.classList.add(className);
+    setTimeout(() => el.combatScene?.classList.remove(className), 380);
+  }
+
   function executeItemAction(item, def, mods) {
     flashBattleItem(item.id);
     const action = def.action;
     const power = Math.max(1, Math.round(action.amount * mods.powerMult + (action.kind === "damage" ? mods.extraDamage : 0)));
 
     if (action.kind === "damage") {
+      flashSceneEffect("enemy-hit");
       const dealt = applyEnemyDamage(power);
       logBattle(`${def.name} → ${dealt}ダメージ`);
     } else if (action.kind === "heal") {
+      flashSceneEffect("player-heal");
       const before = battle.playerHp;
       battle.playerHp = Math.min(MAX_HP, battle.playerHp + power);
       const healed = Math.round(battle.playerHp - before);
@@ -1149,11 +1163,13 @@
         logBattle(`${def.name}の濁りで${action.selfDamage}ダメージ`);
       }
     } else if (action.kind === "shield") {
+      flashSceneEffect("player-shield");
       const before = battle.shield;
       battle.shield = Math.min(MAX_HP * 0.5, battle.shield + power);
       const gained = Math.max(0, Math.round(battle.shield - before));
       logBattle(`${def.name} → 結界+${gained}`);
     } else if (action.kind === "hybrid") {
+      flashSceneEffect("enemy-hit");
       const dealt = applyEnemyDamage(power);
       const shield = Math.max(1, Math.round(action.shield * mods.powerMult));
       const before = battle.shield;
@@ -1173,6 +1189,7 @@
   }
 
   function enemyAttack(baseDamage, label, enraged) {
+    flashSceneEffect("player-hit");
     let amount = baseDamage;
     if (enraged) amount = Math.round(amount * 1.5);
 
