@@ -126,6 +126,28 @@ button:hover:not(:disabled){border-color:#6b7377;transform:translateY(-1px)}
   border:1px solid #514634;background:#2b251d;border-radius:10px;padding:9px 10px;font-size:.78rem
 }
 .reaction-item strong{color:#ffd092}
+.reaction-selected{
+  border-color:#8c6b3c;
+  box-shadow:inset 0 0 0 1px rgba(224,154,86,.18);
+}
+.reaction-alternative{opacity:.82}
+.reaction-status{
+  display:inline-block;
+  margin-top:7px;
+  border:1px solid #80623b;
+  border-radius:99px;
+  padding:2px 7px;
+  color:#f1c98e;
+  font-size:.66rem;
+  font-weight:800;
+}
+.reaction-choice{
+  margin-top:7px;
+  padding:6px 9px;
+  font-size:.7rem;
+  border-color:#785b37;
+  background:#3a2e20;
+}
 .empty-note{color:var(--muted);font-size:.8rem;margin:3px 0}
 .pill{
   border:1px solid var(--line);border-radius:99px;padding:4px 8px;color:var(--muted);font-size:.72rem
