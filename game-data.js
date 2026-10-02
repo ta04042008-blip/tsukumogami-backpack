@@ -3,17 +3,17 @@
 
   const ITEM_DEFS = {
     sword: {
-      name: "古刀", w: 1, h: 2, price: 4, category: "weapon", rotatable: true,
+      name: "古刀", w: 1, h: 2, price: 4, category: "weapon", rotatable: true, icon: "./assets/items/kotou_32x32.png",
       description: "2.5秒ごとに12ダメージ。",
       action: { kind: "damage", amount: 12, interval: 2500 }
     },
     hammer: {
-      name: "槌", w: 1, h: 2, price: 4, category: "weapon", rotatable: true,
+      name: "槌", w: 1, h: 2, price: 4, category: "weapon", rotatable: true, icon: "./assets/items/hammer_32x32.png",
       description: "4秒ごとに20ダメージ。重いが強力。",
       action: { kind: "damage", amount: 20, interval: 4000 }
     },
     mirror: {
-      name: "鏡", w: 1, h: 1, price: 5, category: "support",
+      name: "鏡", w: 1, h: 1, price: 5, category: "support", icon: "./assets/items/mirror_32x32.png",
       description: "隣接する補助道具の配置効果を20%強める。",
       mirrorAmp: 0.2
     },
@@ -43,12 +43,12 @@
       action: { kind: "heal", amount: 8, interval: 5000 }
     },
     oil: {
-      name: "油壺", w: 1, h: 1, price: 3, category: "support",
+      name: "油壺", w: 1, h: 1, price: 3, category: "support", icon: "./assets/items/oil_32x32.png",
       description: "隣接武器に炎の追加ダメージ+4。",
       adjacentWeaponBonus: 4
     },
     flint: {
-      name: "火打石", w: 1, h: 1, price: 3, category: "fire",
+      name: "火打石", w: 1, h: 1, price: 3, category: "fire", icon: "./assets/items/flint_32x32.png",
       description: "隣接する火系道具の効果量+25%。",
       fireBoost: 0.25
     },
