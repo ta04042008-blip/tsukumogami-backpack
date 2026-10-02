@@ -44,6 +44,9 @@ jobs:
           grep -q 'app.js' index.html
           grep -q 'interaction.js' index.html
           grep -q 'interaction.css' index.html
+          grep -q 'stageMap' index.html
+          grep -q 'itemDetailStats' index.html
+          grep -q 'ui-rebuild.css' index.html
 
       - name: Smoke-test static serving
         run: |
