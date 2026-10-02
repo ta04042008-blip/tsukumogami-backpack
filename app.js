@@ -266,6 +266,7 @@
 
   function renderAll() {
     renderHud();
+    renderStageMap();
     renderBag();
     renderStaging();
     renderReactions();
@@ -282,6 +283,23 @@
     el.playerHpLabel.textContent = `${Math.max(0, Math.round(state.hp))} / ${MAX_HP}`;
     el.playerHpBar.style.width = `${Math.max(0, Math.min(100, state.hp))}%`;
     el.coinLabel.textContent = `${state.coins}文`;
+  }
+
+  function renderStageMap() {
+    if (!el.stageMap) return;
+    el.stageMap.innerHTML = "";
+
+    ENEMIES.forEach((enemy, index) => {
+      const number = index + 1;
+      const node = document.createElement("div");
+      node.className = "stage-node";
+      if (number < state.turn) node.classList.add("done");
+      if (number === state.turn && !state.runOver) node.classList.add("current");
+      if (enemy.boss) node.classList.add("boss");
+      node.textContent = number;
+      node.title = `${number}戦目：${enemy.name}${enemy.boss ? "（ボス）" : ""}`;
+      el.stageMap.appendChild(node);
+    });
   }
 
   function renderBag() {
