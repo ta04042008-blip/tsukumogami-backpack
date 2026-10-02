@@ -336,7 +336,17 @@
           if (isAnchor) {
             const label = document.createElement("span");
             label.className = "cell-label";
-            label.textContent = def.name;
+
+            const glyph = document.createElement("span");
+            glyph.className = "item-glyph";
+            glyph.textContent = itemGlyph(item);
+            label.appendChild(glyph);
+
+            const name = document.createElement("span");
+            name.className = "cell-item-name";
+            name.textContent = shortItemName(item);
+            label.appendChild(name);
+
             const sub = document.createElement("span");
             sub.className = "cell-sub";
             const { w, h } = dimensions(item);
@@ -380,6 +390,7 @@
     if (state.inBattle || state.runOver) return;
 
     if (occupiedId) {
+      state.previewType = null;
       state.selectedId = occupiedId;
       renderAll();
       return;
@@ -418,6 +429,7 @@
         slot.innerHTML = `<strong>${def.name}</strong><span>${dimensions(item).w}×${dimensions(item).h}</span>`;
         slot.addEventListener("click", () => {
           if (state.inBattle || state.runOver) return;
+          state.previewType = null;
           state.selectedId = item.id;
           renderAll();
         });
