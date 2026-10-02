@@ -89,3 +89,11 @@
 - 古道具そのものが主役
 - 道具変化は「合成」より「変質・破損・霊化」の印象
 - 付喪神化は通常変化より明確に特別扱い
+
+## V4 reference pass (CSS only)
+
+- Layout rows (phones >= 680px tall): arena (HUD + route + fighters) takes the remaining height, then staging pockets + small actions, the 6x5 bag, the shelf, and the start button.
+- The bag width is derived from the viewport (`--v4-bag-w`, capped at 94% of the screen) so cells stay square and as large as possible; battle mode keeps the bag the same size and gives the freed height to the arena.
+- Fighters are drawn at integer scales (2x prep, 3x battle) on tall phones; short phones (<= 780px) use 1.5x / 2x and drop name plates and shop captions.
+- Item detail stays a fixed overlay over the arena and never shifts the layout.
+- Cache version: `?v=20261002e`.
